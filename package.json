@@ -1,0 +1,24 @@
+{
+  "name": "invoice-app-electron",
+  "version": "1.0.0",
+  "description": "Gestor de facturas en multiplataforma.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sermarmar/invoice-app-electron.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sermarmar/invoice-app-electron/issues"
+  },
+  "homepage": "https://github.com/sermarmar/invoice-app-electron#readme",
+  "devDependencies": {
+    "electron": "^39.2.4"
+  }
+}
