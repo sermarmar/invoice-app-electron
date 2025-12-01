@@ -1,6 +1,10 @@
 export class Client {
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
+    constructor(data = {}) {
+        this.id = data.id;
+        this.name = data.name;
+        this.dni = data.dni;
+        this.address = data.address;
+        this.postal_code = data.postal_code;
+        this.phone = data.phone;
     }
 }

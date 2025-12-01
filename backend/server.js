@@ -1,19 +1,18 @@
 import express from "express";
 import cors from "cors";
 import { userRouter } from "./src/adapters/routes/userRouter.js";
+import { clientRouter } from "./src/adapters/routes/clientRouter.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Inyección de dependencias
-//const productRepo = new SQLiteProductRepository();
-//const productService = new ProductService(productRepo);
-//const productController = createProductController(productService);
 const userRouterInstance = userRouter();
+const clientRouterInstance = clientRouter();
 
 // Montar rutas
 app.use("/api/users", userRouterInstance);
+app.use("/api/clients", clientRouterInstance);
 
 // Error handler centralizado
 app.use((err, req, res, next) => {
