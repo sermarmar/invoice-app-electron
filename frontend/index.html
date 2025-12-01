@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Facturas</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container main-container" id="mainContainer">
+        <div class="home-card">
+            <h1 class="text-center mb-4 fw-bold">
+                <i class="fas fa-file-invoice text-primary"></i> 
+                Sistema de Gestión de Facturas
+            </h1>
+            <p class="text-center text-muted mb-5">Selecciona una empresa para crear una factura</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="empresa-card text-center" onclick="abrirFactura('empresa1')">
+                        <i class="fas fa-building fa-3x text-primary mb-3"></i>
+                        <h3 class="fw-bold">Maite Martín Gastelut</h3>
+                        <p class="text-muted mb-2">calle xxxxxxxx</p>
+                        <p class="text-muted mb-2">Tel: +34 xxxxxxxxx</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="empresa-card text-center" onclick="abrirFactura('empresa2')">
+                        <i class="fas fa-industry fa-3x text-success mb-3"></i>
+                        <h3 class="fw-bold">Eloisa Martín Gastelut</h3>
+                        <p class="text-muted mb-2">Calle xxxxxxxxxxx</p>
+                        <p class="text-muted mb-2">Tel: xxxxxxxxxxxxxx</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
