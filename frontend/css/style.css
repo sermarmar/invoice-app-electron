@@ -1,0 +1,75 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.main-container {
+    display: block;
+}
+.factura-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    padding: 40px;
+    margin: 30px auto;
+    max-width: 900px;
+}
+.home-card {
+    background: white;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    max-width: 800px;
+    margin: 0 auto;
+}
+.empresa-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 30px;
+    margin: 15px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.empresa-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+}
+.header-factura {
+    border-bottom: 3px solid #0d6efd;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+.total-section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+.btn-volver {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+@media print {
+    body {
+        background: white;
+    }
+    .no-print {
+        display: none !important;
+    }
+    .factura-container {
+        box-shadow: none;
+        padding: 20px;
+        display: block !important;
+    }
+}
+.btn-eliminar {
+    cursor: pointer;
+    color: #dc3545;
+}
+.btn-eliminar:hover {
+    color: #bb2d3b;
+}
