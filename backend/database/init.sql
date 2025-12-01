@@ -8,23 +8,28 @@ CREATE TABLE IF NOT EXISTS users (
   username TEXT NOT NULL UNIQUE,
   name VARCHAR(25) NOT NULL,
   apellidos VARCHAR(50) NOT NULL,
+  dni VARCHAR(9) NOT NULL UNIQUE,
+  account VARCHAR(24) NOT NULL UNIQUE,
+  address VARCHAR(100),
+  postal_code VARCHAR(5),
+  phone VARCHAR(15)
 );
 
-INSERT INTO users (username, name, apellidos, email, password) VALUES
-('maite', 'Maite', 'Martín Gastelut'),
-('elo', 'Eloisa', 'Martín Gastelut');
+INSERT INTO users (username, name, apellidos, dni, postal_code, address, phone, account) VALUES
+('maite', 'Maite', 'Martín Gastelut', '12345678A', '05267', 'Calle Mayor 2', '123456789', 'ES12345678901234567890'),
+('elo', 'Eloisa', 'Martín Gastelut', '87654321B', '05267', 'Calle Mayor 2', '987654321', 'ES09876543210987654321');
 
 -- ============================
 -- 2. TABLA DE CLIENTES
 -- ============================
 CREATE TABLE IF NOT EXISTS clients (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name VARCHAR(50) NOT NULL
+  name VARCHAR(50) NOT NULL,
+  dni VARCHAR(9) UNIQUE,
+  address VARCHAR(100),
+  postal_code VARCHAR(5),
+  phone VARCHAR(15)
 );
-
-
-INSERT INTO clients (name) VALUES
-('Tienda');
 
 -- ============================
 -- 3. TABLA DE FACTURAS

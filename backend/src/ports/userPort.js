@@ -1,4 +1,4 @@
-export class UserRepository {
+export class UserPort {
 
     async findAll() {
         throw new Error("findAll Not implemented");
