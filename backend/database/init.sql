@@ -36,14 +36,14 @@ CREATE TABLE IF NOT EXISTS clients (
 -- ============================
 CREATE TABLE IF NOT EXISTS invoices (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  invoice_id INTEGER NOT NULL,
   user_id INTEGER NOT NULL,
   client_id INTEGER NOT NULL,
   date DATE NOT NULL,
-  total_iva DECIMAL(10, 2) NOT NULL,
-  recession DECIMAL(10, 2) NOT NULL,
   total DECIMAL(10, 2) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+  CONSTRAINT uniq_invoices_invoice_id_user_id_client_id UNIQUE (invoice_id, user_id, client_id)
 );
 
 -- Índice para buscar facturas por usuario
