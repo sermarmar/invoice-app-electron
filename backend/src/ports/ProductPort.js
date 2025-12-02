@@ -12,4 +12,8 @@ export class ProductPort {
         throw new Error("update Not implemented");
     }
 
+    async delete(id) {
+        throw new Error("delete Not implemented");
+    }
+
 }

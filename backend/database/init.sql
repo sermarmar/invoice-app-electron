@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 INSERT INTO users (username, name, apellidos, dni, postal_code, address, phone, account) VALUES
-('maite', 'Maite', 'Martín Gastelut', '12345678A', '05267', 'Calle Mayor 2', '123456789', 'ES12345678901234567890'),
-('elo', 'Eloisa', 'Martín Gastelut', '87654321B', '05267', 'Calle Mayor 2', '987654321', 'ES09876543210987654321');
+('maite', 'María Teresa', 'Martín Gastelut', '06563913N', '05267', 'Calle Mayor 18, San Bartolomé de Pinares (Ávila)', '656591205', 'ES6021003592441300056278'),
+('elo', 'Eloisa', 'Martín Gastelut', '70797439N', '05267', 'Calle Mayor 10, San Bartolomé de Pinares (Ávila)', '651564395', 'ES1121003592412210006741');
 
 -- ============================
 -- 2. TABLA DE CLIENTES
@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS clients (
   postal_code VARCHAR(5),
   phone VARCHAR(15)
 );
+
+INSERT INTO clients (name, dni, address, postal_code, phone) VALUES
+('Garmez Alimentación S.L.', 'B24833535', 'Calle La Nava 33, El Barraco (Ávila)', '05110', '');
 
 -- ============================
 -- 3. TABLA DE FACTURAS
@@ -65,4 +68,4 @@ CREATE TABLE IF NOT EXISTS products (
 
 
 -- Índice para buscar productos por factura
-CREATE INDEX IF NOT EXISTS idx_products_factura_id ON products (invoice_id);
+CREATE INDEX IF NOT EXISTS idx_products_invoice_id ON products (invoice_id);

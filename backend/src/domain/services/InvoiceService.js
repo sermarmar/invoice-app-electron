@@ -1,15 +1,15 @@
 
 import { InvoiceResponse } from '../../adapters/resource/InvoiceResponse.js';
 import { InvoiceRepository } from '../../infraestructure/repositories/InvoiceRepository.js';
-import { ProductRepository } from '../../infraestructure/repositories/ProductRepository.js';
 import { ClientRepository } from '../../infraestructure/repositories/clientRepository.js';
+import { ProductService } from './ProductService.js';
 
 export class InvoiceService {
 
     constructor() {
         this.invoiceRepository = new InvoiceRepository();
-        this.productRepository = new ProductRepository();
         this.clientRepository = new ClientRepository();
+        this.productService = new ProductService();
     }
 
     async getInvoicesByUserId(userId) {
@@ -17,7 +17,7 @@ export class InvoiceService {
         const invoicesData = [];
 
         for (const invoice of invoices) {
-            const products = await this.productRepository.findByInvoiceId(invoice.id);
+            const products = await this.productService.getProductsByInvoiceId(invoice.id);
             const client = await this.clientRepository.findById(invoice.clientId);
             invoicesData.push({
                 ...invoice,
@@ -31,7 +31,7 @@ export class InvoiceService {
 
     async getInvoiceById(id) {
         const invoice = await this.invoiceRepository.findById(id);
-        const products = await this.productRepository.findByInvoiceId(invoice.id);
+        const products = await this.productService.getProductsByInvoiceId(invoice.id);
         const client = await this.clientRepository.findById(invoice.clientId);
         const invoiceData = {
             ...invoice,
@@ -60,7 +60,7 @@ export class InvoiceService {
 
         for (const product of invoiceCommand.products || []) {
             product.invoiceId = createdInvoice.id;
-            await this.productRepository.create(product);
+            await this.productService.addProductToInvoice(product);
         }
 
         return createdInvoice;
@@ -69,14 +69,9 @@ export class InvoiceService {
     async updateInvoice(id, invoiceCommand) {
         const updatedInvoice = await this.invoiceRepository.update(id, invoiceCommand);
 
-        for (const product of invoiceCommand.products) {
-            if (product.id) {
-                await this.productRepository.update(product.id, product);
-            } else {
-                product.invoiceId = updatedInvoice.id;
-                await this.productRepository.create(product);
-            }
-        }
+        await this.productService.updateProducts(id, invoiceCommand.products || []);
+
+        updatedInvoice.products = await this.productService.getProductsByInvoiceId(id);
 
         return updatedInvoice;
     }
