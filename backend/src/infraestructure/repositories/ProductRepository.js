@@ -49,4 +49,12 @@ export class ProductRepository extends ProductPort {
         });
     }
 
+    async delete(id) {
+        const db = await openDb();
+        await db.run(
+            `DELETE FROM products WHERE id = ?`,
+            [id]
+        );
+    }
+
 }
