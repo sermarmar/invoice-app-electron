@@ -2,9 +2,20 @@
   "name": "invoice-app-electron",
   "version": "1.0.0",
   "description": "Gestor de facturas en multiplataforma.",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "cd backend && npm install",
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder --win --mac --linux"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^39.2.4"
   },
   "repository": {
     "type": "git",
@@ -13,12 +24,49 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "build": {
+    "appId": "com.invoice.electron",
+    "productName": "Invoice App",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "frontend/**/*",
+      "backend/**/*",
+      "!backend/node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/node_modules",
+        "to": "backend/node_modules",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+        "target": ["nsis"],
+        "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.business"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+        "oneClick": false,
+        "allowToChangeInstallationDirectory": true,
+        "createDesktopShortcut": true,
+        "createStartMenuShortcut": true
+    }
+  },  
   "bugs": {
-    "url": "https://github.com/sermarmar/invoice-app-electron/issues"
+      "url": "https://github.com/sermarmar/invoice-app-electron/issues"
   },
-  "homepage": "https://github.com/sermarmar/invoice-app-electron#readme",
-  "devDependencies": {
-    "electron": "^39.2.4"
-  }
+  "homepage": "https://github.com/sermarmar/invoice-app-electron#readme"
+  
 }
