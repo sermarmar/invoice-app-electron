@@ -1,9 +1,14 @@
+const empresa = JSON.parse(sessionStorage.getItem('empresa'));
+
+$('#companyName').text(empresa.name + " " + empresa.apellidos)
+
+
 const invoiceRows = () => Array.from(document.querySelectorAll('#invoiceList .invoice-row'));
-            const invoiceCountEl = document.getElementById('invoiceCount');
-            const invoiceDetail = document.getElementById('invoiceDetail');
-            const editBtn = document.getElementById('editInvoice');
-            const printBtn = document.getElementById('printInvoice');
-            const deleteBtn = document.getElementById('deleteInvoice');
+const invoiceCountEl = document.getElementById('invoiceCount');
+const invoiceDetail = document.getElementById('invoiceDetail');
+const editBtn = document.getElementById('editInvoice');
+const printBtn = document.getElementById('printInvoice');
+const deleteBtn = document.getElementById('deleteInvoice');
 
 function updateCount() {
     const visible = invoiceRows().filter(r => r.style.display !== 'none').length;

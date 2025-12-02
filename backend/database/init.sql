@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 INSERT INTO users (username, name, apellidos, dni, postal_code, address, phone, account) VALUES
 ('maite', 'María Teresa', 'Martín Gastelut', '06563913N', '05267', 'Calle Mayor 18, San Bartolomé de Pinares (Ávila)', '656591205', 'ES6021003592441300056278'),
-('elo', 'Eloisa', 'Martín Gastelut', '70797439N', '05267', 'Calle Mayor 10, San Bartolomé de Pinares (Ávila)', '651564395', 'ES1121003592412210006741');
+('elo', 'Eloisa', 'Martín Gastelut', '70797439N', '05267', 'Calle Mayor 16, San Bartolomé de Pinares (Ávila)', '651564395', 'ES1121003592412210006741');
 
 -- ============================
 -- 2. TABLA DE CLIENTES
