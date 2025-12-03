@@ -61,8 +61,20 @@ function runInitScript() {
 function isFirstRun() {
   const userDataPath = app.getPath('userData');
   const flagFile = path.join(userDataPath, '.initialized');
-  
-  return !fs.existsSync(flagFile);
+  const dbFile = path.join(__dirname, 'backend', 'database', 'app.db');
+
+  // Primera ejecución si no existe el flag o si falta la base de datos
+  const flagMissing = !fs.existsSync(flagFile);
+  const dbMissing = !fs.existsSync(dbFile);
+
+  if (flagMissing) {
+    console.log('🔍 Flag de inicialización no encontrado');
+  }
+  if (dbMissing) {
+    console.log('🔍 Base de datos backend/database/app.db no encontrada');
+  }
+
+  return flagMissing || dbMissing;
 }
 
 // Marcar que la app ya fue inicializada
