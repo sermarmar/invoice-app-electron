@@ -168,10 +168,26 @@ function recalcularTotales(products) {
 }
 
 $('#printInvoice').click(function() {
-    const printContent = $('#invoiceDetail').clone(); // Clone the content to avoid removing it from the DOM
-    const originalContent = $('body').html(); // Store the original content
-    $('body').html(printContent); // Replace body content with the invoice detail
-    window.print(); // Trigger print
-    $('body').html(originalContent); // Restore original content
-    location.reload(); // Reload the page
+    $.ajax({
+        url: 'http://localhost:3001/api/invoices/' + $('.invoice-row.table-active').data('id') + '/pdf',
+        method: 'GET',
+        datatype: 'binary',
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(response) {
+            const blob = new Blob([response], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invoice_${$('.invoice-row.table-active').data('invoiceid')}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al generar el PDF, consulta con el técnico.');
+        }
+    });
 });
