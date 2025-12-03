@@ -146,9 +146,10 @@ function guardarFactura() {
         data: JSON.stringify(factura),
         dataType: 'json',
         success: function(response) {
-            console.log('Factura guardada:', response);
-            // opcional: redirigir o mostrar mensaje
-            console.error('Error al guardar factura:', status, error);
+            window.location.href = 'factura.html?empresa=' + encodeURIComponent(empresa.id);
+        },
+        error: function(xhr, status, error) {
+            alert('Error al guardar la factura, consulta con el técnico');
         }
     });
 }

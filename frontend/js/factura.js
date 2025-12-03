@@ -1,14 +1,39 @@
+const facturas = [];
 const empresa = JSON.parse(sessionStorage.getItem('empresa'));
+$('#facturaContainer').hide();
 
-$('#companyName').text(empresa.name + " " + empresa.apellidos)
+$('#companyName').text(empresa.name + " " + empresa.apellidos);
 
+$.ajax({
+    url: 'http://localhost:3001/api/invoices/user/' + empresa.id,
+    method: 'GET',
+    datatype: 'json',
+    success: function(response) {
+        $('#invoiceList').empty();
+        if(response.length === 0) {
+            $('#invoiceTable').html('<p class="h-100 d-flex align-items-center justify-content-center">No hay facturas disponibles.</p>');
+        }
+        response.forEach(factura => {
+            facturas.push(factura);
+            $('#invoiceList').append(`
+                <tr class="invoice-row" data-id="${factura.id}" data-invoiceId="${factura.invoiceId}" data-client='${JSON.stringify(factura.client)}' data-date="${factura.date}" data-products='${JSON.stringify(factura.products)}' data-total="${factura.total}">
+                    <td>${factura.invoiceId}</td>
+                    <td>${factura.client.name}</td>
+                    <td>${factura.date}</td>
+                    <td>${factura.total.toFixed(2)} €</td>
+                </tr>
+            `);
+        })
+        attachRowHandlers();
+        updateCount();
+    }
+})
 
 const invoiceRows = () => Array.from(document.querySelectorAll('#invoiceList .invoice-row'));
 const invoiceCountEl = document.getElementById('invoiceCount');
 const invoiceDetail = document.getElementById('invoiceDetail');
-const editBtn = document.getElementById('editInvoice');
-const printBtn = document.getElementById('printInvoice');
-const deleteBtn = document.getElementById('deleteInvoice');
+const editBtn = $('#editInvoice');
+const printBtn = $('#printInvoice');
 
 function updateCount() {
     const visible = invoiceRows().filter(r => r.style.display !== 'none').length;
@@ -22,19 +47,41 @@ function clearSelection() {
 }
 
 function showDetail(row) {
-    const id = row.dataset.id;
-    const client = row.dataset.client;
-    const date = row.dataset.date;
-    const total = row.dataset.total;
-    invoiceDetail.innerHTML = `
-        <h5>${id}</h5>
-        <p><strong>Cliente:</strong> ${client}</p>
-        <p><strong>Fecha:</strong> ${date}</p>
-        <p><strong>Total:</strong> ${total} €</p>
-        <hr>
-        <p class="mb-0 text-muted">Aquí puede ir el detalle de líneas, impuestos y acciones.</p>
-    `;
-    editBtn.disabled = printBtn.disabled = deleteBtn.disabled = false;
+    $('#facturaContainer').show();
+    $('#selectInvoiceMessage').hide();
+    $('#datosEmpresa').html(`
+        <h2>${empresa.name || ''} ${empresa.apellidos || ''}</h2>
+        <h5>NIF: ${empresa.dni || ''}</h5>
+        <p>Dirección: ${empresa.address || ''}</p>
+        <p>Código Postal: ${empresa.postal_code || ''}</p>
+        <p>Teléfono: ${empresa.phone || ''}</p>
+    `);
+    $('#cuentasBancarias').html(`
+        <p><strong>Cuenta Bancaria: </strong>${empresa.account || ''}</p>
+    `);
+    $('#numFactura').text(row.dataset.invoiceid);
+    $('#fechaFactura').text(row.dataset.date);
+    const client = JSON.parse(row.dataset.client);
+    $('#cliente').html(`
+        <div class="col-4"><b>Cliente: ${client.name}</b></div>
+        <div class="col-2">CIF: ${client.dni}</div>
+        <div class="col-6">Dirección: ${client.address || ''}, ${client.postal_code || ''}</div>
+    `);
+    const products = JSON.parse(row.dataset.products);
+    $('#tablaPrecios').empty();
+    products.forEach(product => {
+        $('#tablaPrecios').append(`
+            <tr>
+                <td class="text-end">${product.units}</td>    
+                <td>${product.name}</td>
+                <td class="text-end">${product.price} €</td>
+                <td class="text-end subtotal">${(parseInt(product.units) * parseFloat(product.price)).toFixed(2)} €</td>
+            </tr>
+        `);
+    });
+    recalcularTotales(products);
+    $('#printInvoice').prop('disabled', false);
+    //editBtn.disabled = printBtn.disabled = deleteBtn.disabled = false;
 }
 
     
@@ -92,3 +139,39 @@ function crearFactura() {
     var url = 'crearFactura.html?empresa=' + encodeURIComponent(empresaId);
     window.location.href = url;
 }
+
+function recalcularTotales(products) {
+    let totalGeneral = 0;
+
+    products.forEach(product => {
+        let cantidad = product.units;
+        let precio = parseFloat(product.price);
+
+        if (!isFinite(cantidad)) cantidad = 0;
+        if (!isFinite(precio)) precio = 0;
+
+        const subtotal = cantidad * precio;
+        $(this).find(".subtotal").text(subtotal.toFixed(2) + ' €');
+        totalGeneral += subtotal;
+    });
+
+    const iva = totalGeneral * 0.21;
+    const retencion = totalGeneral * 0.19;
+    const totalTodo = totalGeneral + iva - retencion;
+
+    $("#total").text(totalGeneral.toFixed(2) + ' €');
+    $("#iva").text(iva.toFixed(2) + ' €');
+    $("#retencion").text(retencion.toFixed(2) + ' €');
+    $('#totalTodo').text(totalTodo.toFixed(2) + ' €');
+
+    return { totalGeneral, iva, retencion, totalTodo };
+}
+
+$('#printInvoice').click(function() {
+    const printContent = $('#invoiceDetail').clone(); // Clone the content to avoid removing it from the DOM
+    const originalContent = $('body').html(); // Store the original content
+    $('body').html(printContent); // Replace body content with the invoice detail
+    window.print(); // Trigger print
+    $('body').html(originalContent); // Restore original content
+    location.reload(); // Reload the page
+});

@@ -55,12 +55,12 @@
         <!-- Row 3: Listado de facturas (izq) + Detalle (der) -->
         <div class="row">
             <div class="col-md-4 mb-3">
-                <div class="card h-100">
+                <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <strong>Facturas</strong>
                         <small class="text-muted" id="invoiceCount">0</small>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body p-0" id="invoiceTable">
                         <div class="table-responsive" style="max-height: 420px; overflow:auto;">
                             <table class="table table-hover mb-0">
                                 <thead class="table-light sticky-top">
@@ -72,25 +72,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="invoiceList">
-                                    <!-- Ejemplo de filas; en producción generar dinámicamente -->
-                                    <tr class="invoice-row" data-id="INV-001" data-date="2025-11-01" data-client="ACME Corp" data-total="150.00">
-                                        <td>INV-001</td>
-                                        <td>ACME Corp</td>
-                                        <td>2025-11-01</td>
-                                        <td>150.00</td>
-                                    </tr>
-                                    <tr class="invoice-row" data-id="INV-002" data-date="2025-11-10" data-client="Beta S.L." data-total="320.50">
-                                        <td>INV-002</td>
-                                        <td>Beta S.L.</td>
-                                        <td>2025-11-10</td>
-                                        <td>320.50</td>
-                                    </tr>
-                                    <tr class="invoice-row" data-id="INV-003" data-date="2025-12-01" data-client="Cliente Demo" data-total="45.00">
-                                        <td>INV-003</td>
-                                        <td>Cliente Demo</td>
-                                        <td>2025-12-01</td>
-                                        <td>45.00</td>
-                                    </tr>
+                                    <!-- Filas de facturas generadas dinámicamente -->
                                 </tbody>
                             </table>
                         </div>
@@ -104,8 +86,75 @@
                         <strong>Detalle de factura</strong>
                     </div>
                     <div class="card-body" id="invoiceDetail">
-                        <p class="text-muted">Selecciona una factura para ver el detalle.</p>
-                        <!-- Contenido dinámico -->
+                        <p class="text-muted" id="selectInvoiceMessage">Selecciona una factura para ver el detalle.</p>
+                        <div class="factura-container" id="facturaContainer">
+                            <div class="header-factura">
+                                <div class="row">
+                                    <div class="col-md-6" id="datosEmpresa">
+                                    
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <h1 class="fw-bold mb-3">FACTURA</h1>
+                                        <div class="mb-2">
+                                            <strong>Nº Factura: <span id="numFactura"></span></strong>
+                                        </div>
+                                        <div>
+                                            <strong>Fecha:</strong>
+                                            <span id="fechaFactura"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="cliente" class="row mb-4">
+                                
+                            </div>
+
+                            <div class="tabla-items">
+                                <table class="table table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th style="width: 10%;">Cantidad</th>
+                                            <th style="width: 50%;">Concepto</th>
+                                            <th style="width: 15%;" class="text-end">Precio Unit.</th>
+                                            <th style="width: 15%;" class="text-end">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaPrecios">
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 offset-md-6">
+                                    <div class="total-section">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Subtotal:</span>
+                                            <span class="fw-bold" id="total">0.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>IVA (21%):</span>
+                                            <span class="fw-bold" id="iva">0.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Retención (19%):</span>
+                                            <span class="fw-bold" id="retencion">0.00</span>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="h5 fw-bold">TOTAL:</span>
+                                            <span class="h5 fw-bold text-primary" id="totalTodo">0.00 €</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <hr>
+                                <div class="col-12" id="cuentasBancarias">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-footer d-flex gap-2">
                         <button id="editInvoice" class="btn btn-secondary" disabled><i class="fa fa-edit me-1"></i>Editar</button>
