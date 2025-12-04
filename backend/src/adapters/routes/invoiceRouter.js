@@ -9,6 +9,7 @@ export function invoiceRouter() {
     router.get("/:id", controller.getInvoiceById);
     router.post("/", controller.createInvoice);
     router.put("/:id", controller.updateInvoice);
+    router.get("/:id/pdf", controller.generateInvoicePDF);
 
     return router;
 }

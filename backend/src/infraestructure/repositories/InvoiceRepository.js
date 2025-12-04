@@ -12,9 +12,9 @@ export class InvoiceRepository extends InvoicePort {
         const invoices = await db.all("SELECT * FROM invoices WHERE user_id = ?", [userId]);
         return invoices.map(invoice => new Invoice({
             id: invoice.id,
-            invoice_id: invoice.invoice_id,
-            user_id: invoice.user_id,
-            client_id: invoice.client_id,
+            invoiceId: invoice.invoice_id,
+            userId: invoice.user_id,
+            clientId: invoice.client_id,
             total: invoice.total,
             date: invoice.date
         }));
@@ -26,8 +26,9 @@ export class InvoiceRepository extends InvoicePort {
         if (!invoice) return null;
         return new Invoice({
             id: invoice.id,
-            invoice_id: invoice.invoice_id,
-            client_id: invoice.client_id,
+            invoiceId: invoice.invoice_id,
+            clientId: invoice.client_id,
+            userId: invoice.user_id,
             amount: invoice.total,
             date: invoice.date
         });

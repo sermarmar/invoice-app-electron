@@ -2,15 +2,18 @@ import { Invoice } from '../../domain/models/invoice.js';
 import { InvoiceService } from '../../domain/services/InvoiceService.js';
 import { InvoiceResource } from '../resource/InvoiceResource.js';
 import { InvoiceResponse } from '../resource/InvoiceResponse.js';
+import { GeneratePDFService } from '../../domain/services/GeneratePDFService.js';
 
 export class InvoiceController {
 
     constructor() {
         this.invoiceService = new InvoiceService();
+        this.generateInvoicePDFService = new GeneratePDFService();
         this.getInvoicesByUserId = this.getInvoicesByUserId.bind(this);
         this.getInvoiceById = this.getInvoiceById.bind(this);
         this.createInvoice = this.createInvoice.bind(this);
         this.updateInvoice = this.updateInvoice.bind(this);
+        this.generateInvoicePDF = this.generateInvoicePDF.bind(this);
     }
 
     async getInvoicesByUserId(req, res) {
@@ -64,6 +67,21 @@ export class InvoiceController {
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
+    }
+
+    async generateInvoicePDF(req, res) {
+        try {
+            const id = parseInt(req.params.id, 10);
+            const pdfBytes = await this.generateInvoicePDFService.generateInvoicePDF(id);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename=invoice_${id}.pdf`);
+            res.setHeader('Content-Length', pdfBytes.length);
+            res.send(Buffer.from(pdfBytes));
+        } catch (error) {
+            console.error('Error al generar factura PDF:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+
     }
 
 }

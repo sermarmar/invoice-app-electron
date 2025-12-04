@@ -3,3 +3,4 @@ backend/node_modules/
 frontend/node_modules/
 electron/node_modules/
 backend/database/app.db
+dist/
