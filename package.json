@@ -14,7 +14,7 @@
     "build:all": "electron-builder --win --mac --linux"
   },
   "devDependencies": {
-    "electron": "^39.2.4",
+    "electron": "^39.2.7",
     "electron-builder": "^26.0.12"
   },
   "repository": {
@@ -34,21 +34,20 @@
       "main.js",
       "preload.js",
       "frontend/**/*",
-      "backend/**/*",
-      "!backend/node_modules/**/*"
+      "!backend"
     ],
     "extraResources": [
-      {
-        "from": "backend/node_modules",
-        "to": "backend/node_modules",
-        "filter": [
-          "**/*"
-        ]
-      }
+      "backend"
     ],
+    "asar": true,
     "win": {
       "target": [
-        "nsis"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.ico"
     },

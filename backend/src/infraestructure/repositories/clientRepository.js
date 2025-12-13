@@ -3,39 +3,75 @@ import { Client } from "../../domain/models/client.js";
 import { ClientPort } from "../../ports/clientPort.js";
 
 export class ClientRepository extends ClientPort {
-    
-    constructor() {
-        super();
-    }
 
-    async findAll() {
-        const db = await openDb();
-        const clients = await db.all("SELECT * FROM clients");
-        return clients.map(client => new Client(client));
-    }
+  findAll() {
+    const db = openDb();
+    const rows = db.prepare("SELECT * FROM clients").all();
+    return rows.map(row => new Client(row));
+  }
 
-    async findById(id) {
-        const db = await openDb();
-        const client = await db.get(`SELECT * FROM clients WHERE id = ?`, [id]);
-        if (!client) return null;
-        return new Client(client);
-    }
+  findById(id) {
+    const db = openDb();
+    const row = db.prepare("SELECT * FROM clients WHERE id = ?").get(id);
+    if (!row) throw new Error("Client not found");
+    return new Client(row);
+  }
 
-    async create(client) {
-        const db = await openDb();
-        const result = await db.run(
-            `INSERT INTO clients (name, dni, address, postal_code, phone) VALUES (?, ?, ?, ?, ?)`,
-            [client.name, client.dni, client.address, client.postal_code, client.phone]
-        );
-        return new Client({ id: result.lastID, ...client });
-    }
+  create(client) {
+    try {
+      const db = openDb();
+      const stmt = db.prepare(`
+        INSERT INTO clients (name, dni, address, postal_code, phone, email)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
 
-    async update(id, client) {
-        const db = await openDb();
-        await db.run(
-            `UPDATE clients SET name = ?, dni = ?, address = ?, postal_code = ?, phone = ? WHERE id = ?`,
-            [client.name, client.dni, client.address, client.postal_code, client.phone, id]
-        );
-        return new Client({ id, ...client });
+      const result = stmt.run(
+        client.name,
+        client.dni,
+        client.address,
+        client.postal_code,
+        client.phone,
+        client.email
+      );
+
+      return new Client({ id: result.lastInsertRowid, ...client });
+
+    } catch (err) {
+      if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+        throw new Error("DNI, teléfono o email ya existe");
+      }
+      throw err;
     }
+  }
+
+  update(id, client) {
+    const db = openDb();
+
+    const exists = db.prepare("SELECT id FROM clients WHERE id = ?").get(id);
+    if (!exists) throw new Error("Client not found");
+
+    try {
+      db.prepare(`
+        UPDATE clients
+        SET name = ?, dni = ?, address = ?, postal_code = ?, phone = ?, email = ?
+        WHERE id = ?
+      `).run(
+        client.name,
+        client.dni,
+        client.address,
+        client.postal_code,
+        client.phone,
+        client.email,
+        id
+      );
+
+      return new Client({ id, ...client });
+
+    } catch (err) {
+      if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+        throw new Error("DNI, teléfono o email ya existe");
+      }
+      throw err;
+    }
+  }
 }

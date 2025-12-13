@@ -8,8 +8,9 @@ export class InvoiceRepository extends InvoicePort {
     }
 
     async findByUserId(userId) {
-        const db = await openDb();
-        const invoices = await db.all("SELECT * FROM invoices WHERE user_id = ?", [userId]);
+        const db = openDb();
+        const stmt = db.prepare("SELECT * FROM invoices WHERE user_id = ?");
+        const invoices = stmt.all(userId);
         return invoices.map(invoice => new Invoice({
             id: invoice.id,
             invoiceId: invoice.invoice_id,
@@ -21,8 +22,9 @@ export class InvoiceRepository extends InvoicePort {
     }
 
     async findById(id) {
-        const db = await openDb();
-        const invoice = await db.get("SELECT * FROM invoices WHERE id = ?", [id]);
+        const db = openDb();
+        const stmt = db.prepare("SELECT * FROM invoices WHERE id = ?");
+        const invoice = stmt.get(id);
         if (!invoice) return null;
         return new Invoice({
             id: invoice.id,
@@ -35,13 +37,13 @@ export class InvoiceRepository extends InvoicePort {
     }
 
     async create(invoice) {
-        const db = await openDb();
-        const result = await db.run(
-            `INSERT INTO invoices (invoice_id, user_id, client_id, date, total) VALUES (?, ?, ?, ?, ?)`,
-            [invoice.invoiceId, invoice.userId, invoice.clientId, invoice.date, invoice.total]
+        const db = openDb();
+        const stmt = db.prepare(
+            `INSERT INTO invoices (invoice_id, user_id, client_id, date, total) VALUES (?, ?, ?, ?, ?)`
         );
+        const result = stmt.run(invoice.invoiceId, invoice.userId, invoice.clientId, invoice.date, invoice.total);
         return new Invoice({
-            id: result.lastID,
+            id: result.lastInsertRowid,
             invoice_id: invoice.invoiceId,
             user_id: invoice.userId,
             client_id: invoice.clientId,
@@ -52,11 +54,11 @@ export class InvoiceRepository extends InvoicePort {
     }
 
     async update(id, invoice) {
-        const db = await openDb();
-        await db.run(
-            `UPDATE invoices SET client_id = ?, date = ?, total = ? WHERE id = ?`,
-            [invoice.clientId, invoice.date, invoice.total, id]
+        const db = openDb();
+        const stmt = db.prepare(
+            `UPDATE invoices SET client_id = ?, date = ?, total = ? WHERE id = ?`
         );
+        stmt.run(invoice.clientId, invoice.date, invoice.total, id);
         return new Invoice({
             id,
             invoice_id: invoice.invoiceId,

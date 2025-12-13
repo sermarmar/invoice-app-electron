@@ -8,8 +8,9 @@ export class ProductRepository extends ProductPort {
     }
 
     async findByInvoiceId(invoiceId) {
-        const db = await openDb();
-        const products = await db.all("SELECT * FROM products WHERE invoice_id = ?", [invoiceId]);
+        const db = openDb();
+        const stmt = db.prepare("SELECT * FROM products WHERE invoice_id = ?");
+        const products = stmt.all(invoiceId);
         return products.map(product => new Product({
             id: product.id,
             name: product.name,
@@ -20,13 +21,13 @@ export class ProductRepository extends ProductPort {
     }
 
     async create(product) {
-        const db = await openDb();
-        const result = await db.run(
-            `INSERT INTO products (invoice_id, name, units, price) VALUES (?, ?, ?, ?)`,
-            [product.invoiceId, product.name, product.units, product.price]
+        const db = openDb();
+        const stmt = db.prepare(
+            `INSERT INTO products (invoice_id, name, units, price) VALUES (?, ?, ?, ?)`
         );
+        const result = stmt.run(product.invoiceId, product.name, product.units, product.price);
         return new Product({
-            id: result.lastID,
+            id: result.lastInsertRowid,
             name: product.name,
             price: product.price,
             units: product.units,
@@ -35,11 +36,11 @@ export class ProductRepository extends ProductPort {
     }
 
     async update(id, product) {
-        const db = await openDb();
-        await db.run(
-            `UPDATE products SET invoice_id = ?, name = ?, units = ?, price = ? WHERE id = ?`,
-            [product.invoiceId, product.name, product.units, product.price, id]
+        const db = openDb();
+        const stmt = db.prepare(
+            `UPDATE products SET invoice_id = ?, name = ?, units = ?, price = ? WHERE id = ?`
         );
+        stmt.run(product.invoiceId, product.name, product.units, product.price, id);
         return new Product({
             id,
             name: product.name,
@@ -50,11 +51,11 @@ export class ProductRepository extends ProductPort {
     }
 
     async delete(id) {
-        const db = await openDb();
-        await db.run(
-            `DELETE FROM products WHERE id = ?`,
-            [id]
+        const db = openDb();
+        const stmt = db.prepare(
+            `DELETE FROM products WHERE id = ?`
         );
+        stmt.run(id);
     }
 
 }

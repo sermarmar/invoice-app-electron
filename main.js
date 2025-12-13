@@ -6,51 +6,129 @@ const { spawn } = require('child_process');
 let mainWindow;
 let serverProcess;
 
+// Configurar logging
+const logFile = path.join(app.getPath('userData'), 'app.log');
+const log = (message) => {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+  console.log(message);
+  try {
+    fs.appendFileSync(logFile, logMessage);
+  } catch (err) {
+    console.error('Error writing to log:', err);
+  }
+};
+
+log('=== APP STARTING ===');
+log('App path: ' + app.getAppPath());
+log('User data path: ' + app.getPath('userData'));
+log('Is packaged: ' + app.isPackaged);
+log('Platform: ' + process.platform);
+log('__dirname: ' + __dirname);
+
+// Obtener la ruta correcta del backend según si está empaquetado o no
+function getBackendPath() {
+  if (app.isPackaged) {
+    // En producción, el backend está en extraResources
+    const resourcesPath = path.join(process.resourcesPath, 'backend');
+    log('Backend path (packaged): ' + resourcesPath);
+    return resourcesPath;
+  } else {
+    // En desarrollo
+    const devPath = path.join(__dirname, 'backend');
+    log('Backend path (dev): ' + devPath);
+    return devPath;
+  }
+}
+
 function startExpressServer() {
   return new Promise((resolve, reject) => {
-    // Iniciar el servidor Express como proceso hijo
-    const serverPath = path.join(__dirname, 'backend', 'server.js');
+    const backendPath = getBackendPath();
+    const serverPath = path.join(backendPath, 'server.js');
     
-    serverProcess = spawn('node', [serverPath], {
-      cwd: path.join(__dirname, 'backend'),
-      stdio: 'inherit'
+    log('Starting Express server...');
+    log('Server path: ' + serverPath);
+    
+    // Verificar que el archivo existe
+    if (!fs.existsSync(serverPath)) {
+      const error = 'ERROR: server.js not found at ' + serverPath;
+      log(error);
+      reject(new Error(error));
+      return;
+    }
+    
+    // Usar process.execPath para ejecutar Node.js dentro de Electron
+    serverProcess = spawn(process.execPath, [serverPath], {
+      cwd: backendPath,
+      stdio: 'inherit',
+      env: { 
+        ...process.env, 
+        ELECTRON_RUN_AS_NODE: '1',
+        NODE_ENV: 'production'
+      }
     });
 
     serverProcess.on('error', (err) => {
+      log('ERROR starting server: ' + err.message);
       console.error('Error al iniciar el servidor:', err);
       reject(err);
     });
 
+    serverProcess.on('exit', (code, signal) => {
+      log('Server process exited with code: ' + code + ', signal: ' + signal);
+    });
+
     // Esperar a que el servidor esté listo
     setTimeout(() => {
+      log('Server should be ready now');
       console.log('Servidor Express iniciado');
       resolve();
-    }, 2000);
+    }, 3000);
   });
 }
 
 // Ejecutar script de inicialización
 function runInitScript() {
   return new Promise((resolve, reject) => {
+    log('Running init script...');
     console.log('🔧 Ejecutando script de inicialización...');
     
-    const initPath = path.join(__dirname, 'backend', 'src', 'init.js');
-    const initProcess = spawn('node', [initPath], {
-      cwd: path.join(__dirname, 'backend'),
-      stdio: 'inherit'
+    const backendPath = getBackendPath();
+    const initPath = path.join(backendPath, 'src', 'init.js');
+    
+    log('Init script path: ' + initPath);
+    
+    // Verificar que el archivo existe
+    if (!fs.existsSync(initPath)) {
+      const error = 'ERROR: init.js not found at ' + initPath;
+      log(error);
+      reject(new Error(error));
+      return;
+    }
+    
+    const initProcess = spawn(process.execPath, [initPath], {
+      cwd: backendPath,
+      stdio: 'inherit',
+      env: { 
+        ...process.env, 
+        ELECTRON_RUN_AS_NODE: '1' 
+      }
     });
 
     initProcess.on('close', (code) => {
       if (code === 0) {
+        log('Init completed successfully');
         console.log('✅ Inicialización completada exitosamente');
         resolve();
       } else {
+        log('Init failed with code: ' + code);
         console.error('❌ Error en la inicialización, código:', code);
         reject(new Error(`Init script failed with code ${code}`));
       }
     });
 
     initProcess.on('error', (err) => {
+      log('ERROR running init: ' + err.message);
       console.error('❌ Error al ejecutar init.js:', err);
       reject(err);
     });
@@ -61,16 +139,23 @@ function runInitScript() {
 function isFirstRun() {
   const userDataPath = app.getPath('userData');
   const flagFile = path.join(userDataPath, '.initialized');
-  const dbFile = path.join(__dirname, 'backend', 'database', 'app.db');
+  const backendPath = getBackendPath();
+  const dbFile = path.join(backendPath, 'database', 'app.db');
+
+  log('Checking first run...');
+  log('Flag file: ' + flagFile);
+  log('DB file: ' + dbFile);
 
   // Primera ejecución si no existe el flag o si falta la base de datos
   const flagMissing = !fs.existsSync(flagFile);
   const dbMissing = !fs.existsSync(dbFile);
 
   if (flagMissing) {
+    log('Flag missing - first run detected');
     console.log('🔍 Flag de inicialización no encontrado');
   }
   if (dbMissing) {
+    log('Database missing - first run detected');
     console.log('🔍 Base de datos backend/database/app.db no encontrada');
   }
 
@@ -82,8 +167,11 @@ function markAsInitialized() {
   const userDataPath = app.getPath('userData');
   const flagFile = path.join(userDataPath, '.initialized');
   
+  log('Marking app as initialized');
+  
   // Crear el archivo de bandera
   fs.writeFileSync(flagFile, new Date().toISOString());
+  log('App marked as initialized: ' + flagFile);
   console.log('✅ App marcada como inicializada');
 }
 
@@ -92,16 +180,22 @@ function resetApp() {
   const userDataPath = app.getPath('userData');
   const flagFile = path.join(userDataPath, '.initialized');
   
+  log('Resetting app...');
+  
   if (fs.existsSync(flagFile)) {
     fs.unlinkSync(flagFile);
+    log('App reset - init will run on next start');
     console.log('🔄 App reseteada - se ejecutará init.js en el próximo arranque');
   }
 }
 
 // Configurar manejadores IPC
 function setupIpcHandlers() {
+  log('Setting up IPC handlers');
+  
   // Resetear la aplicación
   ipcMain.handle('reset-app', async () => {
+    log('Reset app requested');
     resetApp();
     app.relaunch();
     app.exit(0);
@@ -109,11 +203,15 @@ function setupIpcHandlers() {
   
   // Verificar si está inicializada
   ipcMain.handle('is-initialized', () => {
-    return !isFirstRun();
+    const initialized = !isFirstRun();
+    log('Is initialized check: ' + initialized);
+    return initialized;
   });
 }
 
 function createWindow() {
+  log('Creating window...');
+  
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -124,22 +222,30 @@ function createWindow() {
     }
   });
 
-  // Cargar la aplicación (puedes usar localhost si Express sirve el frontend)
-  mainWindow.loadFile('frontend/index.html');
+  // Cargar la aplicación
+  const indexPath = path.join(__dirname, 'frontend', 'index.html');
+  log('Loading frontend from: ' + indexPath);
   
-  // O si Express sirve el frontend:
-  // mainWindow.loadURL('http://localhost:3000');
+  mainWindow.loadFile(indexPath);
   
-  mainWindow.webContents.openDevTools();
+  // Abrir DevTools solo en desarrollo
+  if (!app.isPackaged) {
+    mainWindow.webContents.openDevTools();
+  }
+  
+  log('Window created successfully');
 }
 
 app.whenReady().then(async () => {
   try {
+    log('App ready event fired');
+    
     // Configurar manejadores IPC
     setupIpcHandlers();
     
     // Verificar si es la primera ejecución
     if (isFirstRun()) {
+      log('First run detected - running initialization');
       console.log('🎉 Primera ejecución detectada');
       
       // Ejecutar script de inicialización
@@ -148,39 +254,77 @@ app.whenReady().then(async () => {
       // Marcar como inicializada
       markAsInitialized();
     } else {
+      log('App already initialized');
       console.log('✅ App ya inicializada previamente');
     }
     
     // Iniciar el servidor Express
+    log('Starting Express server...');
     await startExpressServer();
     
     // Crear la ventana
+    log('Creating main window...');
     createWindow();
 
     app.on('activate', function () {
-      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+      log('App activated');
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+      }
     });
+    
+    log('=== APP STARTED SUCCESSFULLY ===');
   } catch (error) {
+    log('FATAL ERROR during startup: ' + error.message);
+    log('Stack trace: ' + error.stack);
     console.error('Error al iniciar la aplicación:', error);
+    
+    // Mostrar diálogo de error
+    const { dialog } = require('electron');
+    dialog.showErrorBox(
+      'Error al iniciar',
+      'La aplicación no pudo iniciarse correctamente.\n\n' +
+      'Error: ' + error.message + '\n\n' +
+      'Revisa el log en:\n' + logFile
+    );
+    
     app.quit();
   }
 });
 
 app.on('window-all-closed', function () {
+  log('All windows closed');
+  
   // Cerrar el servidor Express
   if (serverProcess) {
+    log('Killing server process');
     serverProcess.kill();
   }
   
   // En Mac, las apps suelen quedarse abiertas aunque cierres las ventanas
   // En Windows/Linux, cerrar la ventana cierra la app
   if (process.platform !== 'darwin') {
+    log('Quitting app (non-macOS)');
     app.quit();
   }
 });
 
 app.on('before-quit', () => {
+  log('App quitting...');
   if (serverProcess) {
+    log('Killing server process before quit');
     serverProcess.kill();
   }
+});
+
+// Capturar errores no manejados
+process.on('uncaughtException', (error) => {
+  log('UNCAUGHT EXCEPTION: ' + error.message);
+  log('Stack: ' + error.stack);
+  console.error('Uncaught exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  log('UNHANDLED REJECTION at: ' + promise + ', reason: ' + reason);
+  console.error('Unhandled rejection:', reason);
 });

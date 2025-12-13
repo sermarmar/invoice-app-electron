@@ -8,14 +8,16 @@ export class UserRepository extends UserPort {
     }
 
     async findAll() {
-        const db = await openDb();
-        const users = await db.all("SELECT * FROM users");
+        const db = openDb();
+        const stmt = db.prepare("SELECT * FROM users");
+        const users = stmt.all();
         return users.map(user => new User(user));
     }
 
     async findById(id) {
-        const db = await openDb();
-        const user = await db.get(`SELECT * FROM users WHERE id = ?`, [id]);
+        const db = openDb();
+        const stmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
+        const user = stmt.get(id);
         if (!user) return null;
         return new User(user);
     }
