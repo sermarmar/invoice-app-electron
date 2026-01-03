@@ -7,10 +7,10 @@
     "postinstall": "electron-builder install-app-deps && cd backend && npm install",
     "start": "electron .",
     "dev": "electron . --dev",
-    "build": "electron-builder",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux",
+    "build": "electron-builder --publish=never",
+    "build:win": "electron-builder --win --publish=never",
+    "build:mac": "electron-builder --mac --publish=never",
+    "build:linux": "electron-builder --linux --publish=never",
     "build:all": "npm run build:$(node -e \"console.log(process.platform === 'darwin' ? 'mac' : process.platform === 'win32' ? 'win' : 'linux')\")"
   },
   "devDependencies": {
