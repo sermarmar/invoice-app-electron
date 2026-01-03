@@ -4,14 +4,14 @@
   "description": "Gestor de facturas en multiplataforma.",
   "main": "main.js",
   "scripts": {
-    "postinstall": "cd backend && npm install",
+    "postinstall": "electron-builder install-app-deps && cd backend && npm install",
     "start": "electron .",
     "dev": "electron . --dev",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
-    "build:all": "electron-builder --win --mac --linux"
+    "build:all": "npm run build:$(node -e \"console.log(process.platform === 'darwin' ? 'mac' : process.platform === 'win32' ? 'win' : 'linux')\")"
   },
   "devDependencies": {
     "@electron/rebuild": "^4.0.2",
