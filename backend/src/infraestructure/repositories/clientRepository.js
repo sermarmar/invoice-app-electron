@@ -18,60 +18,41 @@ export class ClientRepository extends ClientPort {
   }
 
   create(client) {
+    const db = openDb();
+    const stmt = db.prepare(`
+      INSERT INTO clients (name, dni, address, postal_code, phone, email)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
     try {
-      const db = openDb();
-      const stmt = db.prepare(`
-        INSERT INTO clients (name, dni, address, postal_code, phone, email)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `);
-
-      const result = stmt.run(
-        client.name,
-        client.dni,
-        client.address,
-        client.postal_code,
-        client.phone,
-        client.email
-      );
-
+      const result = stmt.run(client.name, client.dni, client.address, client.postal_code, client.phone, client.email);
       return new Client({ id: result.lastInsertRowid, ...client });
-
     } catch (err) {
       if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
         throw new Error("DNI, teléfono o email ya existe");
+      } else {
+        throw err;
       }
-      throw err;
     }
   }
 
   update(id, client) {
     const db = openDb();
-
-    const exists = db.prepare("SELECT id FROM clients WHERE id = ?").get(id);
-    if (!exists) throw new Error("Client not found");
-
+    const row = db.prepare("SELECT id FROM clients WHERE id = ?").get(id);
+    if (!row) throw new Error("Client not found");
+    const stmt = db.prepare(`
+      UPDATE clients
+      SET name = ?, dni = ?, address = ?, postal_code = ?, phone = ?, email = ?
+      WHERE id = ?
+    `);
     try {
-      db.prepare(`
-        UPDATE clients
-        SET name = ?, dni = ?, address = ?, postal_code = ?, phone = ?, email = ?
-        WHERE id = ?
-      `).run(
-        client.name,
-        client.dni,
-        client.address,
-        client.postal_code,
-        client.phone,
-        client.email,
-        id
-      );
-
+      stmt.run(client.name, client.dni, client.address, client.postal_code, client.phone, client.email, id);
       return new Client({ id, ...client });
-
     } catch (err) {
       if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
         throw new Error("DNI, teléfono o email ya existe");
+      } else {
+        throw err;
       }
-      throw err;
     }
   }
 }

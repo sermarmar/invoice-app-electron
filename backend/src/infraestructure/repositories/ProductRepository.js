@@ -7,54 +7,54 @@ export class ProductRepository extends ProductPort {
         super();
     }
 
-    async findByInvoiceId(invoiceId) {
+    findByInvoiceId(invoiceId) {
         const db = openDb();
-        const stmt = db.prepare("SELECT * FROM products WHERE invoice_id = ?");
-        const products = stmt.all(invoiceId);
-        return products.map(product => new Product({
+        const sql = "SELECT * FROM products WHERE invoice_id = ?";
+        const rows = db.prepare(sql).all(invoiceId);
+        const products = rows.map(product => new Product({
             id: product.id,
             name: product.name,
             price: product.price,
             units: product.units,
             invoiceId: product.invoice_id
         }));
+        return products;
     }
 
-    async create(product) {
+    create(product) {
         const db = openDb();
-        const stmt = db.prepare(
-            `INSERT INTO products (invoice_id, name, units, price) VALUES (?, ?, ?, ?)`
-        );
+        const sql = `INSERT INTO products (invoice_id, name, units, price) VALUES (?, ?, ?, ?)`;
+        const stmt = db.prepare(sql);
         const result = stmt.run(product.invoiceId, product.name, product.units, product.price);
-        return new Product({
+        const newProduct = new Product({
             id: result.lastInsertRowid,
             name: product.name,
             price: product.price,
             units: product.units,
             invoiceId: product.invoiceId
         });
+        return newProduct;
     }
 
-    async update(id, product) {
+    update(id, product) {
         const db = openDb();
-        const stmt = db.prepare(
-            `UPDATE products SET invoice_id = ?, name = ?, units = ?, price = ? WHERE id = ?`
-        );
+        const sql = `UPDATE products SET invoice_id = ?, name = ?, units = ?, price = ? WHERE id = ?`;
+        const stmt = db.prepare(sql);
         stmt.run(product.invoiceId, product.name, product.units, product.price, id);
-        return new Product({
+        const updatedProduct = new Product({
             id,
             name: product.name,
             price: product.price,
             units: product.units,
             invoiceId: product.invoiceId
         });
+        return updatedProduct;
     }
 
-    async delete(id) {
+    delete(id) {
         const db = openDb();
-        const stmt = db.prepare(
-            `DELETE FROM products WHERE id = ?`
-        );
+        const sql = `DELETE FROM products WHERE id = ?`;
+        const stmt = db.prepare(sql);
         stmt.run(id);
     }
 

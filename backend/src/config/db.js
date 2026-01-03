@@ -9,13 +9,14 @@ let db;
 
 export function openDb() {
     if (!db) {
-        const dbPath = path.join(__dirname, "../../database/app.db");
+        const dbPath = process.env.USER_DATA_PATH 
+            ? path.join(process.env.USER_DATA_PATH, 'app.db') 
+            : path.join(__dirname, "../../database/app.db");
 
         db = new Database(dbPath);
 
         // Activar foreign keys
         db.pragma("foreign_keys = ON");
     }
-
     return db;
 }

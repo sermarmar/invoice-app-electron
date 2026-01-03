@@ -64,7 +64,8 @@ function startExpressServer() {
       env: { 
         ...process.env, 
         ELECTRON_RUN_AS_NODE: '1',
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        USER_DATA_PATH: app.getPath('userData')
       }
     });
 
@@ -111,7 +112,8 @@ function runInitScript() {
       stdio: 'inherit',
       env: { 
         ...process.env, 
-        ELECTRON_RUN_AS_NODE: '1' 
+        ELECTRON_RUN_AS_NODE: '1',
+        USER_DATA_PATH: app.getPath('userData')
       }
     });
 

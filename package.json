@@ -14,6 +14,7 @@
     "build:all": "electron-builder --win --mac --linux"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.2",
     "electron": "^39.2.7",
     "electron-builder": "^26.0.12"
   },
@@ -30,16 +31,23 @@
     "directories": {
       "output": "dist"
     },
+    "buildDependenciesFromSource": true,
     "files": [
       "main.js",
       "preload.js",
-      "frontend/**/*",
-      "!backend"
+      "frontend/**/*"
     ],
     "extraResources": [
-      "backend"
+      {
+        "from": "backend",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!node_modules"
+        ]
+      }
     ],
-    "asar": true,
+    "afterPack": "./afterPack.js",
     "win": {
       "target": [
         {
