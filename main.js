@@ -79,12 +79,43 @@ function startExpressServer() {
       log('Server process exited with code: ' + code + ', signal: ' + signal);
     });
 
-    // Esperar a que el servidor esté listo
-    setTimeout(() => {
-      log('Server should be ready now');
-      console.log('Servidor Express iniciado');
-      resolve();
-    }, 3000);
+    waitForServer()
+      .then(() => {
+        log('Server is ready');
+        resolve();
+      })
+      .catch(reject);
+  });
+}
+
+function waitForServer(maxAttempts = 40, intervalMs = 500) {
+  return new Promise((resolve, reject) => {
+    const http = require('http');
+    let attempts = 0;
+
+    const check = () => {
+      attempts++;
+      const req = http.get('http://localhost:3001/api/health', (res) => {
+        if (res.statusCode === 200) {
+          log('Server ready after ' + attempts + ' attempt(s)');
+          resolve();
+        } else {
+          scheduleRetry();
+        }
+      });
+      req.on('error', scheduleRetry);
+      req.setTimeout(400, () => { req.destroy(); scheduleRetry(); });
+    };
+
+    const scheduleRetry = () => {
+      if (attempts >= maxAttempts) {
+        reject(new Error('Server did not start within ' + (maxAttempts * intervalMs / 1000) + 's'));
+        return;
+      }
+      setTimeout(check, intervalMs);
+    };
+
+    setTimeout(check, intervalMs);
   });
 }
 
@@ -142,7 +173,7 @@ function isFirstRun() {
   const userDataPath = app.getPath('userData');
   const flagFile = path.join(userDataPath, '.initialized');
   const backendPath = getBackendPath();
-  const dbFile = path.join(backendPath, 'database', 'app.db');
+  const dbFile = path.join(app.getPath('userData'), 'app.db');
 
   log('Checking first run...');
   log('Flag file: ' + flagFile);

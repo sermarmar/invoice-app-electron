@@ -1,6 +1,10 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { openDb } from "./config/db.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const sqlPath = path.join(__dirname, "../database/init.sql");
 const logFile = path.join(process.env.USER_DATA_PATH || __dirname, 'init.log');

@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 // Puedes también exponer la URL del API si quieres centralizarla
 contextBridge.exposeInMainWorld('config', {
-  API_URL: 'http://localhost:3000/api'
+  API_URL: 'http://localhost:3001/api'
 });
 
 console.log('✅ Preload script cargado correctamente');

@@ -1,45 +1,83 @@
-name: Build and Release
+name: Build & Release
 
 on:
   push:
-    branches: [ main, fix/migrate-better-sql-in-windows ]
+    branches: [main]
+    tags: ['v*']
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: windows-latest
+            build_cmd: build:win
+            artifact_glob: dist/*.exe
+            asset_name: invoice-app-windows.exe
+          - os: macos-latest
+            build_cmd: build:mac
+            artifact_glob: dist/*.dmg
+            asset_name: invoice-app-mac.dmg
+          - os: ubuntu-latest
+            build_cmd: build:linux
+            artifact_glob: dist/*.AppImage
+            asset_name: invoice-app-linux.AppImage
+
+    runs-on: ${{ matrix.os }}
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Setup Python (for electron-rebuild)
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      - name: Configure MSVC (Windows)
+        if: runner.os == 'Windows'
+        run: npm config set msvs_version 2022
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Install backend dependencies
-      run: cd backend && npm install
+      - name: Build
+        run: npm run ${{ matrix.build_cmd }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
-    - name: Build app
-      run: npm run build:all
-      env:
-        CSC_LINK: ${{ secrets.CSC_LINK }}
-        CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+      - name: Rename artifact for stable download URL
+        shell: bash
+        run: |
+          src=$(ls ${{ matrix.artifact_glob }} | head -1)
+          cp "$src" "dist/${{ matrix.asset_name }}"
+          echo "Renamed: $src → dist/${{ matrix.asset_name }}"
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: invoice-app-${{ matrix.os }}
-        path: dist/
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true

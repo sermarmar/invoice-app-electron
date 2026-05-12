@@ -43,7 +43,9 @@
         "to": "backend",
         "filter": [
           "**/*",
-          "!node_modules"
+          "!node_modules/electron/**",
+          "!node_modules/electron-builder/**",
+          "!node_modules/.cache/**"
         ]
       }
     ],
