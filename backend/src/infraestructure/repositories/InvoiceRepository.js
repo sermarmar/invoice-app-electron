@@ -7,10 +7,11 @@ export class InvoiceRepository extends InvoicePort {
         super();
     }
 
-    async findByUserId(userId) {
-        const db = await openDb();
-        const invoices = await db.all("SELECT * FROM invoices WHERE user_id = ?", [userId]);
-        return invoices.map(invoice => new Invoice({
+    findByUserId(userId) {
+        const db = openDb();
+        const sql = "SELECT * FROM invoices WHERE user_id = ?";
+        const rows = db.prepare(sql).all(userId);
+        const invoices = rows.map(invoice => new Invoice({
             id: invoice.id,
             invoiceId: invoice.invoice_id,
             userId: invoice.user_id,
@@ -18,30 +19,35 @@ export class InvoiceRepository extends InvoicePort {
             total: invoice.total,
             date: invoice.date
         }));
+        return invoices;
     }
 
-    async findById(id) {
-        const db = await openDb();
-        const invoice = await db.get("SELECT * FROM invoices WHERE id = ?", [id]);
-        if (!invoice) return null;
-        return new Invoice({
-            id: invoice.id,
-            invoiceId: invoice.invoice_id,
-            clientId: invoice.client_id,
-            userId: invoice.user_id,
-            amount: invoice.total,
-            date: invoice.date
-        });
+    findById(id) {
+        const db = openDb();
+        const sql = "SELECT * FROM invoices WHERE id = ?";
+        const row = db.prepare(sql).get(id);
+        if (!row) {
+            return null;
+        } else {
+            const invoice = new Invoice({
+                id: row.id,
+                invoiceId: row.invoice_id,
+                clientId: row.client_id,
+                userId: row.user_id,
+                amount: row.total,
+                date: row.date
+            });
+            return invoice;
+        }
     }
 
-    async create(invoice) {
-        const db = await openDb();
-        const result = await db.run(
-            `INSERT INTO invoices (invoice_id, user_id, client_id, date, total) VALUES (?, ?, ?, ?, ?)`,
-            [invoice.invoiceId, invoice.userId, invoice.clientId, invoice.date, invoice.total]
-        );
-        return new Invoice({
-            id: result.lastID,
+    create(invoice) {
+        const db = openDb();
+        const sql = `INSERT INTO invoices (invoice_id, user_id, client_id, date, total) VALUES (?, ?, ?, ?, ?)`;
+        const stmt = db.prepare(sql);
+        const result = stmt.run(invoice.invoiceId, invoice.userId, invoice.clientId, invoice.date, invoice.total);
+        const newInvoice = new Invoice({
+            id: result.lastInsertRowid,
             invoice_id: invoice.invoiceId,
             user_id: invoice.userId,
             client_id: invoice.clientId,
@@ -49,15 +55,15 @@ export class InvoiceRepository extends InvoicePort {
             date: invoice.date,
             products: invoice.products || []
         });
+        return newInvoice;
     }
 
-    async update(id, invoice) {
-        const db = await openDb();
-        await db.run(
-            `UPDATE invoices SET client_id = ?, date = ?, total = ? WHERE id = ?`,
-            [invoice.clientId, invoice.date, invoice.total, id]
-        );
-        return new Invoice({
+    update(id, invoice) {
+        const db = openDb();
+        const sql = `UPDATE invoices SET client_id = ?, date = ?, total = ? WHERE id = ?`;
+        const stmt = db.prepare(sql);
+        stmt.run(invoice.clientId, invoice.date, invoice.total, id);
+        const updatedInvoice = new Invoice({
             id,
             invoice_id: invoice.invoiceId,
             user_id: invoice.userId,
@@ -66,6 +72,7 @@ export class InvoiceRepository extends InvoicePort {
             date: invoice.date,
             products: invoice.products || []
         });
+        return updatedInvoice;
     }
 
 }

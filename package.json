@@ -4,17 +4,18 @@
   "description": "Gestor de facturas en multiplataforma.",
   "main": "main.js",
   "scripts": {
-    "postinstall": "cd backend && npm install",
+    "postinstall": "electron-builder install-app-deps && cd backend && npm install",
     "start": "electron .",
     "dev": "electron . --dev",
-    "build": "electron-builder",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux",
-    "build:all": "electron-builder --win --mac --linux"
+    "build": "electron-builder --publish=never",
+    "build:win": "electron-builder --win --publish=never",
+    "build:mac": "electron-builder --mac --publish=never",
+    "build:linux": "electron-builder --linux --publish=never",
+    "build:all": "npm run build:$(node -e \"console.log(process.platform === 'darwin' ? 'mac' : process.platform === 'win32' ? 'win' : 'linux')\")"
   },
   "devDependencies": {
-    "electron": "^39.2.4",
+    "@electron/rebuild": "^4.0.2",
+    "electron": "^39.2.7",
     "electron-builder": "^26.0.12"
   },
   "repository": {
@@ -30,25 +31,33 @@
     "directories": {
       "output": "dist"
     },
+    "buildDependenciesFromSource": true,
     "files": [
       "main.js",
       "preload.js",
-      "frontend/**/*",
-      "backend/**/*",
-      "!backend/node_modules/**/*"
+      "frontend/**/*"
     ],
     "extraResources": [
       {
-        "from": "backend/node_modules",
-        "to": "backend/node_modules",
+        "from": "backend",
+        "to": "backend",
         "filter": [
-          "**/*"
+          "**/*",
+          "!node_modules/electron/**",
+          "!node_modules/electron-builder/**",
+          "!node_modules/.cache/**"
         ]
       }
     ],
+    "afterPack": "./afterPack.js",
     "win": {
       "target": [
-        "nsis"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.ico"
     },

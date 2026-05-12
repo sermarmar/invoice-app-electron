@@ -1,9 +1,22 @@
 # 🚀 Invoice App - Electron
 
+![Build Status](https://github.com/sermarmar/invoice-app-electron/actions/workflows/build.yml/badge.svg)
+
 Aplicación de escritorio multiplataforma construida con Electron, Express, SQLite y PDF generation.
+
+## ⬇️ Descargar
+
+| Plataforma | Descarga |
+|------------|----------|
+| 🪟 Windows | [invoice-app-windows.exe](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-windows.exe) |
+| 🍎 macOS | [invoice-app-mac.dmg](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-mac.dmg) |
+| 🐧 Linux | [invoice-app-linux.AppImage](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-linux.AppImage) |
+
+> Los links apuntan siempre a la última versión publicada. Si aún no hay ninguna release, ve a [Releases](https://github.com/sermarmar/invoice-app-electron/releases) para ver las disponibles.
 
 ## 📋 Tabla de Contenidos
 
+- [Descargar](#️-descargar)
 - [Características](#características)
 - [Requisitos Previos](#requisitos-previos)
 - [Instalación](#instalación)

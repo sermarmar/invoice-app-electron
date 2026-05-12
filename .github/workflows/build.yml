@@ -1,0 +1,83 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            build_cmd: build:win
+            artifact_glob: dist/*.exe
+            asset_name: invoice-app-windows.exe
+          - os: macos-latest
+            build_cmd: build:mac
+            artifact_glob: dist/*.dmg
+            asset_name: invoice-app-mac.dmg
+          - os: ubuntu-latest
+            build_cmd: build:linux
+            artifact_glob: dist/*.AppImage
+            asset_name: invoice-app-linux.AppImage
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Configure MSVC (Windows)
+        if: runner.os == 'Windows'
+        run: npm config set msvs_version 2022
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run ${{ matrix.build_cmd }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Rename artifact for stable download URL
+        shell: bash
+        run: |
+          src=$(ls ${{ matrix.artifact_glob }} | head -1)
+          cp "$src" "dist/${{ matrix.asset_name }}"
+          echo "Renamed: $src → dist/${{ matrix.asset_name }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
