@@ -37,17 +37,16 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Configure MSVC (Windows)
-        if: runner.os == 'Windows'
-        run: npm config set msvs_version 2022
-
       - name: Install dependencies
         run: npm install
+        env:
+          npm_config_msvs_version: '2022'
 
       - name: Build
         run: npm run ${{ matrix.build_cmd }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          npm_config_msvs_version: '2022'
 
       - name: Rename artifact for stable download URL
         shell: bash
