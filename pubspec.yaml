@@ -1,0 +1,45 @@
+name: invoice_app
+description: App de gestión de facturas para Windows. Todo local, sin nube.
+publish_to: none
+version: 1.2.0
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.22.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+  # Inyección de dependencias
+  get_it: ^8.0.2
+
+  # Base de datos local
+  drift: ^2.20.0
+  drift_flutter: ^0.2.1
+
+  # Generación de PDFs
+  pdf: ^3.11.1
+  printing: ^5.13.2
+
+  # Funcional (Either, Unit)
+  fpdart: ^1.1.0
+
+  # Utilidades
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  drift_dev: ^2.20.0
+
+flutter:
+  uses-material-design: true

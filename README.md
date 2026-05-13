@@ -1,18 +1,18 @@
-# 🚀 Invoice App - Electron
+# Invoice App - Flutter
 
-![Build Status](https://github.com/sermarmar/invoice-app-electron/actions/workflows/build.yml/badge.svg)
+![Build](https://github.com/sermarmar/invoice-app-electron/actions/workflows/build.yml/badge.svg)
+![Release](https://github.com/sermarmar/invoice-app-electron/actions/workflows/release.yml/badge.svg)
 
-Aplicación de escritorio multiplataforma construida con Electron, Express, SQLite y PDF generation.
+Aplicación de escritorio construida con Flutter.
 
-## ⬇️ Descargar
+## Descargar
 
 | Plataforma | Descarga |
 |------------|----------|
-| 🪟 Windows | [invoice-app-windows.exe](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-windows.exe) |
-| 🍎 macOS | [invoice-app-mac.dmg](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-mac.dmg) |
-| 🐧 Linux | [invoice-app-linux.AppImage](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-linux.AppImage) |
+| Windows | [invoice-app-windows-1.2.0.zip](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-windows-1.2.0.zip) |
+| macOS | [invoice-app-macos-1.2.0.zip](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-macos-1.2.0.zip) |
 
-> Los links apuntan siempre a la última versión publicada. Si aún no hay ninguna release, ve a [Releases](https://github.com/sermarmar/invoice-app-electron/releases) para ver las disponibles.
+> Los links apuntan siempre a la ultima version publicada. Actualiza el numero de version en esta tabla al hacer una nueva release. Si aun no hay ninguna release, ve a [Releases](https://github.com/sermarmar/invoice-app-electron/releases) para ver las disponibles.
 
 ## 📋 Tabla de Contenidos
 

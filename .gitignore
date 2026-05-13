@@ -1,6 +1,31 @@
-node_modules/
-backend/node_modules/
-frontend/node_modules/
-electron/node_modules/
-backend/database/app.db
-dist/
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+# pubspec.lock se sube intencionalmente (app, no paquete)
+
+# Código generado por Drift — se sube para que CI no necesite build_runner
+# lib/core/database/database.g.dart
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# macOS
+.DS_Store
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/ephemeral/
+
+# Windows
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugins.cmake
+
+# Electron (backup - no se sube)
+electron_backup/

@@ -1,17 +1,11 @@
-name: Build & Release
+name: Build
 
 on:
   push:
     branches: [main]
-    tags: ['v*', '[0-9]*']
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      create_release:
-        description: 'Crear release de GitHub con los instaladores'
-        type: boolean
-        default: false
 
 jobs:
   build:
@@ -20,68 +14,44 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            build_cmd: build:win
-            artifact_glob: dist/*.exe
-            asset_name: invoice-app-windows.exe
+            platform: windows
           - os: macos-latest
-            build_cmd: build:mac
-            artifact_glob: dist/*.dmg
-            asset_name: invoice-app-mac.dmg
-          - os: ubuntu-latest
-            build_cmd: build:linux
-            artifact_glob: dist/*.AppImage
-            asset_name: invoice-app-linux.AppImage
+            platform: macos
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: subosito/flutter-action@v2
         with:
-          node-version: '20'
-          cache: 'npm'
+          flutter-version: '3.41.0'
+          channel: 'stable'
+          cache: true
 
       - name: Install dependencies
-        run: npm install
+        run: flutter pub get
+
+      - name: Build Windows
+        if: matrix.platform == 'windows'
+        run: flutter build windows --release
+
+      - name: Build macOS
+        if: matrix.platform == 'macos'
+        run: flutter build macos --release
         env:
-          npm_config_msvs_version: '2022'
+          CODE_SIGNING_ALLOWED: "NO"
 
-      - name: Build
-        run: npm run ${{ matrix.build_cmd }}
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-          npm_config_msvs_version: '2022'
-
-      - name: Rename artifact for stable download URL
-        shell: bash
-        run: |
-          src=$(ls ${{ matrix.artifact_glob }} | head -1)
-          cp "$src" "dist/${{ matrix.asset_name }}"
-          echo "Renamed: $src → dist/${{ matrix.asset_name }}"
-
-      - name: Upload artifact
+      - name: Upload Windows artifact
+        if: matrix.platform == 'windows'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.asset_name }}
-          path: dist/${{ matrix.asset_name }}
+          name: windows-build
+          path: build/windows/x64/runner/Release/
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.create_release == 'true'
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - name: Upload macOS artifact
+        if: matrix.platform == 'macos'
+        uses: actions/upload-artifact@v4
         with:
-          path: artifacts
-          merge-multiple: true
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: artifacts/*
-          generate_release_notes: true
+          name: macos-build
+          path: build/macos/Build/Products/Release/invoice_app.app

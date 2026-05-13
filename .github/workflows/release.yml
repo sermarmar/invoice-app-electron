@@ -1,0 +1,113 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*', '[0-9]*']
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          RAW="${{ github.ref_name }}"
+          VERSION="${RAW#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Package Windows ZIP
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "invoice-app-windows-$version.zip"
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: invoice-app-windows-*.zip
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: flutter build macos --release
+        env:
+          CODE_SIGNING_ALLOWED: "NO"
+
+      - name: Get version
+        id: version
+        run: |
+          RAW="${{ github.ref_name }}"
+          VERSION="${RAW#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Package macOS ZIP
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ditto -c -k --sequesterRsrc --keepParent \
+            "build/macos/Build/Products/Release/invoice_app.app" \
+            "invoice-app-macos-$VERSION.zip"
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: invoice-app-macos-*.zip
+
+  release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Get version
+        id: version
+        run: |
+          RAW="${{ github.ref_name }}"
+          VERSION="${RAW#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Invoice App v${{ steps.version.outputs.version }}"
+          files: artifacts/*
+          generate_release_notes: true
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
