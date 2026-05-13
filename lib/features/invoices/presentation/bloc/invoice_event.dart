@@ -8,7 +8,11 @@ sealed class InvoiceEvent extends Equatable {
 }
 
 final class LoadInvoices extends InvoiceEvent {
-  const LoadInvoices();
+  final int userId;
+  const LoadInvoices({required this.userId});
+
+  @override
+  List<Object?> get props => [userId];
 }
 
 final class CreateInvoiceEvent extends InvoiceEvent {

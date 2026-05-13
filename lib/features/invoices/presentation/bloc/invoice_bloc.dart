@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/invoice.dart';
 import '../../domain/usecases/get_invoices.dart';
 import '../../domain/usecases/create_invoice.dart';
@@ -12,6 +11,8 @@ class InvoiceBloc extends Bloc<InvoiceEvent, InvoiceState> {
   final GetInvoices getInvoices;
   final CreateInvoice createInvoice;
 
+  int? _currentUserId;
+
   InvoiceBloc({required this.getInvoices, required this.createInvoice})
       : super(const InvoiceInitial()) {
     on<LoadInvoices>(_onLoad);
@@ -19,8 +20,9 @@ class InvoiceBloc extends Bloc<InvoiceEvent, InvoiceState> {
   }
 
   Future<void> _onLoad(LoadInvoices event, Emitter<InvoiceState> emit) async {
+    _currentUserId = event.userId;
     emit(const InvoiceLoading());
-    final result = await getInvoices(const NoParams());
+    final result = await getInvoices(event.userId);
     result.fold(
       (failure) => emit(InvoiceError(failure.message)),
       (invoices) => emit(InvoiceLoaded(invoices)),
@@ -34,7 +36,7 @@ class InvoiceBloc extends Bloc<InvoiceEvent, InvoiceState> {
     final result = await createInvoice(event.invoice);
     result.fold(
       (failure) => emit(InvoiceError(failure.message)),
-      (_) => add(const LoadInvoices()),
+      (_) => add(LoadInvoices(userId: _currentUserId!)),
     );
   }
 }

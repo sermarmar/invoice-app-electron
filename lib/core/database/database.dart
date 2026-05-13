@@ -55,6 +55,38 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+          await _seed();
+        },
+      );
+
+  Future<void> _seed() async {
+    await into(users).insert(const UsersCompanion(
+      username: Value('maite'),
+      name: Value('Maite'),
+      apellidos: Value('García López'),
+      dni: Value('12345678A'),
+      account: Value('ES91 2100 0418 4502 0005 1332'),
+    ));
+    await into(users).insert(const UsersCompanion(
+      username: Value('eloisa'),
+      name: Value('Eloisa'),
+      apellidos: Value('Martínez Ruiz'),
+      dni: Value('87654321B'),
+      account: Value('ES80 2310 0001 1800 0001 2345'),
+    ));
+    await into(clients).insert(const ClientsCompanion(
+      name: Value('Empresa Demo S.L.'),
+      dni: Value('B12345678'),
+      address: Value('Calle Mayor 1, Madrid'),
+      postalCode: Value('28001'),
+      phone: Value('910000000'),
+    ));
+  }
 }
 
 QueryExecutor _openConnection() {
