@@ -10,6 +10,7 @@ import 'features/invoices/data/repositories/invoice_repository_impl.dart';
 import 'features/invoices/domain/repositories/invoice_repository.dart';
 import 'features/invoices/domain/usecases/get_invoices.dart';
 import 'features/invoices/domain/usecases/create_invoice.dart';
+import 'features/invoices/domain/usecases/update_invoice.dart';
 import 'features/invoices/presentation/bloc/invoice_bloc.dart';
 import 'features/clients/data/datasources/client_local_datasource.dart';
 import 'features/clients/data/repositories/client_repository_impl.dart';
@@ -37,7 +38,8 @@ Future<void> init() async {
   sl.registerLazySingleton<InvoiceRepository>(() => InvoiceRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetInvoices(sl()));
   sl.registerLazySingleton(() => CreateInvoice(sl()));
-  sl.registerFactory(() => InvoiceBloc(getInvoices: sl(), createInvoice: sl()));
+  sl.registerLazySingleton(() => UpdateInvoice(sl()));
+  sl.registerFactory(() => InvoiceBloc(getInvoices: sl(), createInvoice: sl(), updateInvoice: sl()));
 
   // ── Clients ───────────────────────────────────────────────────────────────
   sl.registerLazySingleton<ClientLocalDatasource>(

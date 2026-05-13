@@ -8,6 +8,7 @@ abstract interface class InvoiceLocalDatasource {
   Future<List<Invoice>> getByUser(int userId);
   Future<Invoice> getById(int id);
   Future<Invoice> create(Invoice invoice);
+  Future<Invoice> update(Invoice invoice);
   Future<void> delete(int id);
 }
 
@@ -44,6 +45,19 @@ class InvoiceLocalDatasourceImpl implements InvoiceLocalDatasource {
       await _db.into(_db.products).insert(p.copyWith(invoiceId: id).toCompanion());
     }
     return getById(id);
+  }
+
+  @override
+  Future<Invoice> update(Invoice invoice) async {
+    await (_db.update(_db.invoices)..where((t) => t.id.equals(invoice.id!)))
+        .write(invoice.toCompanion());
+    await (_db.delete(_db.products)
+          ..where((t) => t.invoiceId.equals(invoice.id!)))
+        .go();
+    for (final p in invoice.products) {
+      await _db.into(_db.products).insert(p.copyWith(invoiceId: invoice.id!).toCompanion());
+    }
+    return getById(invoice.id!);
   }
 
   @override

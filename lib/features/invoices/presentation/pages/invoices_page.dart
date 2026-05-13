@@ -71,7 +71,7 @@ class _InvoicesView extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: invoices.length,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (_, i) => InvoiceCard(invoice: invoices[i]),
+              itemBuilder: (_, i) => InvoiceCard(invoice: invoices[i], user: user),
             ),
         },
       ),

@@ -7,5 +7,6 @@ abstract interface class InvoiceRepository {
   Future<Either<Failure, List<Invoice>>> getByUser(int userId);
   Future<Either<Failure, Invoice>> getById(int id);
   Future<Either<Failure, Invoice>> create(Invoice invoice);
+  Future<Either<Failure, Invoice>> update(Invoice invoice);
   Future<Either<Failure, Unit>> delete(int id);
 }

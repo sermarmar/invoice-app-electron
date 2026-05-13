@@ -67,24 +67,30 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _seed() async {
     await into(users).insert(const UsersCompanion(
       username: Value('maite'),
-      name: Value('Maite'),
-      apellidos: Value('García López'),
-      dni: Value('12345678A'),
-      account: Value('ES91 2100 0418 4502 0005 1332'),
+      name: Value('María Teresa'),
+      apellidos: Value('Martín Gastelut'),
+      dni: Value('06563913N'),
+      account: Value('ES6021003592441300056278'),
+      address: Value('Calle Mayor 18, San Bartolomé de Pinares (Ávila)'),
+      postalCode: Value('05267'),
+      phone: Value('656591205'),
     ));
     await into(users).insert(const UsersCompanion(
-      username: Value('eloisa'),
+      username: Value('elo'),
       name: Value('Eloisa'),
-      apellidos: Value('Martínez Ruiz'),
-      dni: Value('87654321B'),
-      account: Value('ES80 2310 0001 1800 0001 2345'),
+      apellidos: Value('Martín Gastelut'),
+      dni: Value('70797439N'),
+      account: Value('ES1121003592412210006741'),
+      address: Value('Calle Mayor 16, San Bartolomé de Pinares (Ávila)'),
+      postalCode: Value('05267'),
+      phone: Value('651564395'),
     ));
     await into(clients).insert(const ClientsCompanion(
-      name: Value('Empresa Demo S.L.'),
-      dni: Value('B12345678'),
-      address: Value('Calle Mayor 1, Madrid'),
-      postalCode: Value('28001'),
-      phone: Value('910000000'),
+      name: Value('Garmez Alimentación S.L.'),
+      dni: Value('B24833535'),
+      address: Value('Calle La Nava 33, El Barraco (Ávila)'),
+      postalCode: Value('05110'),
+      phone: Value(''),
     ));
   }
 }

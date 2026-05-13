@@ -45,6 +45,15 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
+  Future<Either<Failure, Invoice>> update(Invoice invoice) async {
+    try {
+      return Right(await _datasource.update(invoice));
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> delete(int id) async {
     try {
       await _datasource.delete(id);

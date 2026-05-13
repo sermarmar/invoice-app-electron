@@ -12,11 +12,13 @@ import '../bloc/invoice_bloc.dart';
 class CreateInvoicePage extends StatelessWidget {
   final User user;
   final int nextInvoiceNumber;
+  final Invoice? invoice; // null = crear, non-null = editar
 
   const CreateInvoicePage({
     super.key,
     required this.user,
     required this.nextInvoiceNumber,
+    this.invoice,
   });
 
   @override
@@ -26,6 +28,7 @@ class CreateInvoicePage extends StatelessWidget {
       child: _CreateInvoiceView(
         user: user,
         nextInvoiceNumber: nextInvoiceNumber,
+        invoice: invoice,
       ),
     );
   }
@@ -40,6 +43,11 @@ class _ProductLine {
       : units = TextEditingController(text: '1'),
         name = TextEditingController(),
         price = TextEditingController(text: '0');
+
+  _ProductLine.fromProduct(Product p)
+      : units = TextEditingController(text: '${p.units}'),
+        name = TextEditingController(text: p.name),
+        price = TextEditingController(text: p.price.toString());
 
   void dispose() {
     units.dispose();
@@ -57,10 +65,12 @@ class _ProductLine {
 class _CreateInvoiceView extends StatefulWidget {
   final User user;
   final int nextInvoiceNumber;
+  final Invoice? invoice;
 
   const _CreateInvoiceView({
     required this.user,
     required this.nextInvoiceNumber,
+    this.invoice,
   });
 
   @override
@@ -73,11 +83,21 @@ class _CreateInvoiceViewState extends State<_CreateInvoiceView> {
   Client? _selectedClient;
   bool _saving = false;
 
+  bool get _isEditing => widget.invoice != null;
+
   @override
   void initState() {
     super.initState();
-    _date = DateTime.now().toIso8601String().split('T')[0];
-    _addLine();
+    if (_isEditing) {
+      _date = widget.invoice!.date;
+      for (final p in widget.invoice!.products) {
+        _lines.add(_ProductLine.fromProduct(p));
+      }
+      if (_lines.isEmpty) _addLine();
+    } else {
+      _date = DateTime.now().toIso8601String().split('T')[0];
+      _addLine();
+    }
   }
 
   @override
@@ -143,7 +163,8 @@ class _CreateInvoiceViewState extends State<_CreateInvoiceView> {
         .toList();
 
     final invoice = Invoice(
-      invoiceId: widget.nextInvoiceNumber,
+      id: widget.invoice?.id,
+      invoiceId: widget.invoice?.invoiceId ?? widget.nextInvoiceNumber,
       userId: widget.user.id!,
       clientId: _selectedClient!.id!,
       date: _date,
@@ -151,7 +172,11 @@ class _CreateInvoiceViewState extends State<_CreateInvoiceView> {
       products: products,
     );
 
-    context.read<InvoiceBloc>().add(CreateInvoiceEvent(invoice));
+    if (_isEditing) {
+      context.read<InvoiceBloc>().add(UpdateInvoiceEvent(invoice));
+    } else {
+      context.read<InvoiceBloc>().add(CreateInvoiceEvent(invoice));
+    }
     Navigator.of(context).pop();
   }
 
@@ -164,7 +189,11 @@ class _CreateInvoiceViewState extends State<_CreateInvoiceView> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Nueva factura #${widget.nextInvoiceNumber.toString().padLeft(3, '0')}'),
+            Text(
+              _isEditing
+                  ? 'Editar factura #${widget.invoice!.invoiceId.toString().padLeft(3, '0')}'
+                  : 'Nueva factura #${widget.nextInvoiceNumber.toString().padLeft(3, '0')}',
+            ),
             Text(
               widget.user.fullName,
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
@@ -197,6 +226,7 @@ class _CreateInvoiceViewState extends State<_CreateInvoiceView> {
               onPickDate: _pickDate,
               selectedClient: _selectedClient,
               onClientChanged: (c) => setState(() => _selectedClient = c),
+              preselectedClientId: widget.invoice?.clientId,
             ),
             const SizedBox(height: 24),
             _ProductsTable(
@@ -228,6 +258,7 @@ class _HeaderRow extends StatelessWidget {
   final VoidCallback onPickDate;
   final Client? selectedClient;
   final ValueChanged<Client?> onClientChanged;
+  final int? preselectedClientId;
 
   const _HeaderRow({
     required this.user,
@@ -235,6 +266,7 @@ class _HeaderRow extends StatelessWidget {
     required this.onPickDate,
     required this.selectedClient,
     required this.onClientChanged,
+    this.preselectedClientId,
   });
 
   @override
@@ -251,6 +283,7 @@ class _HeaderRow extends StatelessWidget {
               _ClientDropdown(
                 selected: selectedClient,
                 onChanged: onClientChanged,
+                preselectedClientId: preselectedClientId,
               ),
               const SizedBox(height: 12),
               _DateField(date: date, onTap: onPickDate),
@@ -301,34 +334,47 @@ class _UserInfoCard extends StatelessWidget {
 
 class _ClientDropdown extends StatelessWidget {
   final Client? selected;
+  final int? preselectedClientId;
   final ValueChanged<Client?> onChanged;
 
-  const _ClientDropdown({required this.selected, required this.onChanged});
+  const _ClientDropdown({
+    required this.selected,
+    required this.onChanged,
+    this.preselectedClientId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ClientBloc, ClientState>(
+    return BlocConsumer<ClientBloc, ClientState>(
+      listenWhen: (_, s) => s is ClientLoaded && selected == null && preselectedClientId != null,
+      listener: (_, state) {
+        if (state is ClientLoaded) {
+          final match = state.clients.where((c) => c.id == preselectedClientId).firstOrNull;
+          if (match != null) onChanged(match);
+        }
+      },
       builder: (context, state) {
         final clients = state is ClientLoaded ? state.clients : <Client>[];
-        return DropdownButtonFormField<Client>(
-          initialValue: selected,
+        return InputDecorator(
           decoration: const InputDecoration(
             labelText: 'Cliente',
             border: OutlineInputBorder(),
             isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
-          items: clients
-              .map(
-                (c) => DropdownMenuItem(
-                  value: c,
-                  child: Text(c.name),
-                ),
-              )
-              .toList(),
-          onChanged: onChanged,
-          hint: state is ClientLoading
-              ? const Text('Cargando...')
-              : const Text('Selecciona un cliente'),
+          child: DropdownButton<Client>(
+            value: selected,
+            isExpanded: true,
+            underline: const SizedBox.shrink(),
+            isDense: true,
+            hint: state is ClientLoading
+                ? const Text('Cargando...')
+                : const Text('Selecciona un cliente'),
+            items: clients
+                .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                .toList(),
+            onChanged: onChanged,
+          ),
         );
       },
     );
