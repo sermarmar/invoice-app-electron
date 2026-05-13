@@ -4,6 +4,7 @@ import '../../../../injection_container.dart';
 import '../../../users/domain/entities/user.dart';
 import '../bloc/invoice_bloc.dart';
 import '../widgets/invoice_card.dart';
+import 'create_invoice_page.dart';
 
 class InvoicesPage extends StatelessWidget {
   final User user;
@@ -37,12 +38,25 @@ class _InvoicesView extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // TODO: navegar a crear factura
+      floatingActionButton: BlocBuilder<InvoiceBloc, InvoiceState>(
+        builder: (context, state) {
+          final count = state is InvoiceLoaded ? state.invoices.length : 0;
+          return FloatingActionButton.extended(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => BlocProvider.value(
+                  value: context.read<InvoiceBloc>(),
+                  child: CreateInvoicePage(
+                    user: user,
+                    nextInvoiceNumber: count + 1,
+                  ),
+                ),
+              ),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text('Nueva factura'),
+          );
         },
-        icon: const Icon(Icons.add),
-        label: const Text('Nueva factura'),
       ),
       body: BlocBuilder<InvoiceBloc, InvoiceState>(
         builder: (context, state) => switch (state) {
