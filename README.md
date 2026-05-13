@@ -9,8 +9,8 @@ Aplicación de escritorio construida con Flutter.
 
 | Plataforma | Descarga |
 |------------|----------|
-| Windows | [invoice-app-windows-1.2.0.zip](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-windows-1.2.0.zip) |
-| macOS | [invoice-app-macos-1.2.0.zip](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-macos-1.2.0.zip) |
+| Windows | [invoice-app-windows-1.2.1.zip](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-windows-1.2.1.zip) |
+| macOS | [invoice-app-macos-1.2.1.zip](https://github.com/sermarmar/invoice-app-electron/releases/latest/download/invoice-app-macos-1.2.1.zip) |
 
 > Los links apuntan siempre a la ultima version publicada. Actualiza el numero de version en esta tabla al hacer una nueva release. Si aun no hay ninguna release, ve a [Releases](https://github.com/sermarmar/invoice-app-electron/releases) para ver las disponibles.
 
