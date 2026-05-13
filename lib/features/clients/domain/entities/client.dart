@@ -3,20 +3,20 @@ import 'package:equatable/equatable.dart';
 class Client extends Equatable {
   final int? id;
   final String name;
-  final String? nif;
+  final String? dni;
   final String? address;
-  final String? email;
+  final String? postalCode;
   final String? phone;
 
   const Client({
     this.id,
     required this.name,
-    this.nif,
+    this.dni,
     this.address,
-    this.email,
+    this.postalCode,
     this.phone,
   });
 
   @override
-  List<Object?> get props => [id, name, nif, address, email, phone];
+  List<Object?> get props => [id, name, dni, address, postalCode, phone];
 }

@@ -1,55 +1,44 @@
-import 'package:drift/drift.dart';
 import '../../../../core/database/database.dart';
 import '../../domain/entities/invoice.dart';
 import '../../domain/entities/invoice_item.dart';
 
 extension InvoiceToCompanion on Invoice {
   InvoicesCompanion toCompanion() => InvoicesCompanion.insert(
-        number: number,
-        clientId: Value(clientId),
+        invoiceId: invoiceId,
+        userId: userId,
+        clientId: clientId,
         date: date,
-        dueDate: Value(dueDate),
-        status: Value(status.name),
-        subtotal: Value(subtotal),
-        taxRate: Value(taxRate),
-        total: Value(total),
-        notes: Value(notes),
+        total: total,
       );
 }
 
 extension InvoiceRowToEntity on InvoiceRow {
-  Invoice toEntity({List<InvoiceItem> items = const []}) => Invoice(
+  Invoice toEntity({List<Product> products = const []}) => Invoice(
         id: id,
-        number: number,
+        invoiceId: invoiceId,
+        userId: userId,
         clientId: clientId,
         date: date,
-        dueDate: dueDate,
-        status: InvoiceStatus.values.byName(status),
-        subtotal: subtotal,
-        taxRate: taxRate,
         total: total,
-        notes: notes,
-        items: items,
+        products: products,
       );
 }
 
-extension InvoiceItemToCompanion on InvoiceItem {
-  InvoiceItemsCompanion toCompanion() => InvoiceItemsCompanion.insert(
+extension ProductToCompanion on Product {
+  ProductsCompanion toCompanion() => ProductsCompanion.insert(
+        name: name,
+        price: price,
+        units: units,
         invoiceId: invoiceId,
-        description: description,
-        quantity: quantity,
-        unitPrice: unitPrice,
-        total: total,
       );
 }
 
-extension InvoiceItemRowToEntity on InvoiceItemRow {
-  InvoiceItem toEntity() => InvoiceItem(
+extension ProductRowToEntity on ProductRow {
+  Product toEntity() => Product(
         id: id,
+        name: name,
+        price: price,
+        units: units,
         invoiceId: invoiceId,
-        description: description,
-        quantity: quantity,
-        unitPrice: unitPrice,
-        total: total,
       );
 }

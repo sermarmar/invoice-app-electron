@@ -1,39 +1,37 @@
 import 'package:equatable/equatable.dart';
 
-class InvoiceItem extends Equatable {
+class Product extends Equatable {
   final int? id;
+  final String name;
+  final double price;
+  final int units;
   final int invoiceId;
-  final String description;
-  final double quantity;
-  final double unitPrice;
-  final double total;
 
-  const InvoiceItem({
+  const Product({
     this.id,
+    required this.name,
+    required this.price,
+    required this.units,
     required this.invoiceId,
-    required this.description,
-    required this.quantity,
-    required this.unitPrice,
-    required this.total,
   });
 
-  InvoiceItem copyWith({
+  double get subtotal => price * units;
+
+  Product copyWith({
     int? id,
+    String? name,
+    double? price,
+    int? units,
     int? invoiceId,
-    String? description,
-    double? quantity,
-    double? unitPrice,
-    double? total,
   }) =>
-      InvoiceItem(
+      Product(
         id: id ?? this.id,
+        name: name ?? this.name,
+        price: price ?? this.price,
+        units: units ?? this.units,
         invoiceId: invoiceId ?? this.invoiceId,
-        description: description ?? this.description,
-        quantity: quantity ?? this.quantity,
-        unitPrice: unitPrice ?? this.unitPrice,
-        total: total ?? this.total,
       );
 
   @override
-  List<Object?> get props => [id, invoiceId, description, quantity, unitPrice, total];
+  List<Object?> get props => [id, name, price, units, invoiceId];
 }

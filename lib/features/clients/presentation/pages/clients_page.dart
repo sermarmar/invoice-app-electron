@@ -46,9 +46,9 @@ class _ClientsView extends StatelessWidget {
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.person)),
                   title: Text(client.name),
-                  subtitle: client.email != null ? Text(client.email!) : null,
-                  trailing: client.nif != null
-                      ? Text(client.nif!,
+                  subtitle: client.phone != null ? Text(client.phone!) : null,
+                  trailing: client.dni != null
+                      ? Text(client.dni!,
                           style: Theme.of(context).textTheme.bodySmall)
                       : null,
                 );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
+import 'features/users/presentation/pages/users_page.dart';
 import 'features/invoices/presentation/pages/invoices_page.dart';
 import 'features/clients/presentation/pages/clients_page.dart';
 
@@ -30,6 +31,7 @@ class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
 
   static const _pages = <Widget>[
+    UsersPage(),
     InvoicesPage(),
     ClientsPage(),
   ];
@@ -46,13 +48,18 @@ class _AppShellState extends State<AppShell> {
             labelType: NavigationRailLabelType.selected,
             destinations: const [
               NavigationRailDestination(
+                icon: Icon(Icons.people_outline),
+                selectedIcon: Icon(Icons.people),
+                label: Text('Usuarios'),
+              ),
+              NavigationRailDestination(
                 icon: Icon(Icons.receipt_long_outlined),
                 selectedIcon: Icon(Icons.receipt_long),
                 label: Text('Facturas'),
               ),
               NavigationRailDestination(
-                icon: Icon(Icons.people_outline),
-                selectedIcon: Icon(Icons.people),
+                icon: Icon(Icons.business_outlined),
+                selectedIcon: Icon(Icons.business),
                 label: Text('Clientes'),
               ),
             ],

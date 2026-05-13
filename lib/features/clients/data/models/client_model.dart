@@ -5,9 +5,9 @@ import '../../domain/entities/client.dart';
 extension ClientToCompanion on Client {
   ClientsCompanion toCompanion() => ClientsCompanion.insert(
         name: name,
-        nif: Value(nif),
+        dni: Value(dni),
         address: Value(address),
-        email: Value(email),
+        postalCode: Value(postalCode),
         phone: Value(phone),
       );
 }
@@ -16,9 +16,9 @@ extension ClientRowToEntity on ClientRow {
   Client toEntity() => Client(
         id: id,
         name: name,
-        nif: nif,
+        dni: dni,
         address: address,
-        email: email,
+        postalCode: postalCode,
         phone: phone,
       );
 }

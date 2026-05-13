@@ -1,0 +1,14 @@
+import 'package:fpdart/fpdart.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/usecase/usecase.dart';
+import '../entities/user.dart';
+import '../repositories/user_repository.dart';
+
+class GetUsers implements UseCase<List<User>, NoParams> {
+  final UserRepository repository;
+  const GetUsers(this.repository);
+
+  @override
+  Future<Either<Failure, List<User>>> call(NoParams params) =>
+      repository.getAll();
+}

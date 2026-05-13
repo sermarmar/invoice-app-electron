@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/invoice.dart';
-import '../../../../core/theme/app_colors.dart';
 
 class InvoiceCard extends StatelessWidget {
   final Invoice invoice;
@@ -24,61 +23,23 @@ class InvoiceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      invoice.number,
+                      'Factura ${invoice.invoiceId.toString().padLeft(3, '0')}',
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      invoice.date,
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text(invoice.date, style: theme.textTheme.bodySmall),
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    invoice.total != null
-                        ? '${invoice.total!.toStringAsFixed(2)} €'
-                        : '—',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  _StatusChip(status: invoice.status),
-                ],
+              Text(
+                '${invoice.total.toStringAsFixed(2)} €',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  final InvoiceStatus status;
-  const _StatusChip({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final (label, color) = switch (status) {
-      InvoiceStatus.draft => ('Borrador', AppColors.twilightIndigo800),
-      InvoiceStatus.sent => ('Enviada', AppColors.apricotCream400),
-      InvoiceStatus.paid => ('Pagada', AppColors.mutedTeal400),
-    };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500),
       ),
     );
   }

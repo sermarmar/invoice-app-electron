@@ -18,6 +18,15 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
+  Future<Either<Failure, List<Invoice>>> getByUser(int userId) async {
+    try {
+      return Right(await _datasource.getByUser(userId));
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Invoice>> getById(int id) async {
     try {
       return Right(await _datasource.getById(id));
@@ -30,15 +39,6 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   Future<Either<Failure, Invoice>> create(Invoice invoice) async {
     try {
       return Right(await _datasource.create(invoice));
-    } catch (e) {
-      return Left(DatabaseFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, Invoice>> update(Invoice invoice) async {
-    try {
-      return Right(await _datasource.update(invoice));
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));
     }

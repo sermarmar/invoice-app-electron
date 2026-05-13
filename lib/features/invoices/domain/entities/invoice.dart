@@ -1,38 +1,31 @@
 import 'package:equatable/equatable.dart';
 import 'invoice_item.dart';
 
-enum InvoiceStatus { draft, sent, paid }
-
 class Invoice extends Equatable {
   final int? id;
-  final String number;
-  final int? clientId;
+  final int invoiceId;
+  final int userId;
+  final int clientId;
   final String date;
-  final String? dueDate;
-  final InvoiceStatus status;
-  final double? subtotal;
-  final double? taxRate;
-  final double? total;
-  final String? notes;
-  final List<InvoiceItem> items;
+  final double total;
+  final List<Product> products;
 
   const Invoice({
     this.id,
-    required this.number,
-    this.clientId,
+    required this.invoiceId,
+    required this.userId,
+    required this.clientId,
     required this.date,
-    this.dueDate,
-    this.status = InvoiceStatus.draft,
-    this.subtotal,
-    this.taxRate,
-    this.total,
-    this.notes,
-    this.items = const [],
+    required this.total,
+    this.products = const [],
   });
 
+  /// Subtotal antes de IVA y retención.
+  double get subtotal => products.fold(0, (sum, p) => sum + p.subtotal);
+  double get iva => subtotal * 0.21;
+  double get retencion => subtotal * 0.19;
+  double get totalCalculado => subtotal + iva - retencion;
+
   @override
-  List<Object?> get props => [
-        id, number, clientId, date, dueDate,
-        status, subtotal, taxRate, total, notes, items,
-      ];
+  List<Object?> get props => [id, invoiceId, userId, clientId, date, total, products];
 }
