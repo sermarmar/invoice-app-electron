@@ -5,6 +5,7 @@ import '../models/user_model.dart';
 abstract interface class UserLocalDatasource {
   Future<List<User>> getAll();
   Future<User> getById(int id);
+  Future<User> create(User user);
 }
 
 class UserLocalDatasourceImpl implements UserLocalDatasource {
@@ -19,6 +20,15 @@ class UserLocalDatasourceImpl implements UserLocalDatasource {
 
   @override
   Future<User> getById(int id) async {
+    final row = await (_db.select(_db.users)
+          ..where((t) => t.id.equals(id)))
+        .getSingle();
+    return row.toEntity();
+  }
+
+  @override
+  Future<User> create(User user) async {
+    final id = await _db.into(_db.users).insert(user.toCompanion());
     final row = await (_db.select(_db.users)
           ..where((t) => t.id.equals(id)))
         .getSingle();

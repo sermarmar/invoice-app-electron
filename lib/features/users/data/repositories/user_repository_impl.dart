@@ -25,4 +25,13 @@ class UserRepositoryImpl implements UserRepository {
       return Left(DatabaseFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, User>> create(User user) async {
+    try {
+      return Right(await _datasource.create(user));
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
 }

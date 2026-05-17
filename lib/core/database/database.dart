@@ -64,35 +64,7 @@ class AppDatabase extends _$AppDatabase {
         },
       );
 
-  Future<void> _seed() async {
-    await into(users).insert(const UsersCompanion(
-      username: Value('maite'),
-      name: Value('María Teresa'),
-      apellidos: Value('Martín Gastelut'),
-      dni: Value('06563913N'),
-      account: Value('ES6021003592441300056278'),
-      address: Value('Calle Mayor 18, San Bartolomé de Pinares (Ávila)'),
-      postalCode: Value('05267'),
-      phone: Value('656591205'),
-    ));
-    await into(users).insert(const UsersCompanion(
-      username: Value('elo'),
-      name: Value('Eloisa'),
-      apellidos: Value('Martín Gastelut'),
-      dni: Value('70797439N'),
-      account: Value('ES1121003592412210006741'),
-      address: Value('Calle Mayor 16, San Bartolomé de Pinares (Ávila)'),
-      postalCode: Value('05267'),
-      phone: Value('651564395'),
-    ));
-    await into(clients).insert(const ClientsCompanion(
-      name: Value('Garmez Alimentación S.L.'),
-      dni: Value('B24833535'),
-      address: Value('Calle La Nava 33, El Barraco (Ávila)'),
-      postalCode: Value('05110'),
-      phone: Value(''),
-    ));
-  }
+  Future<void> _seed() async {}
 }
 
 QueryExecutor _openConnection() {

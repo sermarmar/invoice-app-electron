@@ -4,6 +4,7 @@ import 'features/users/data/datasources/user_local_datasource.dart';
 import 'features/users/data/repositories/user_repository_impl.dart';
 import 'features/users/domain/repositories/user_repository.dart';
 import 'features/users/domain/usecases/get_users.dart';
+import 'features/users/domain/usecases/create_user.dart';
 import 'features/users/presentation/bloc/user_bloc.dart';
 import 'features/invoices/data/datasources/invoice_local_datasource.dart';
 import 'features/invoices/data/repositories/invoice_repository_impl.dart';
@@ -16,6 +17,7 @@ import 'features/clients/data/datasources/client_local_datasource.dart';
 import 'features/clients/data/repositories/client_repository_impl.dart';
 import 'features/clients/domain/repositories/client_repository.dart';
 import 'features/clients/domain/usecases/get_clients.dart';
+import 'features/clients/domain/usecases/create_client.dart';
 import 'features/clients/presentation/bloc/client_bloc.dart';
 
 final sl = GetIt.instance;
@@ -29,7 +31,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetUsers(sl()));
-  sl.registerFactory(() => UserBloc(getUsers: sl()));
+  sl.registerLazySingleton(() => CreateUser(sl()));
+  sl.registerFactory(() => UserBloc(getUsers: sl(), createUser: sl()));
 
   // ── Invoices ──────────────────────────────────────────────────────────────
   sl.registerLazySingleton<InvoiceLocalDatasource>(
@@ -47,5 +50,6 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<ClientRepository>(() => ClientRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetClients(sl()));
-  sl.registerFactory(() => ClientBloc(getClients: sl()));
+  sl.registerLazySingleton(() => CreateClient(sl()));
+  sl.registerFactory(() => ClientBloc(getClients: sl(), createClient: sl()));
 }

@@ -5,4 +5,5 @@ import '../entities/user.dart';
 abstract interface class UserRepository {
   Future<Either<Failure, List<User>>> getAll();
   Future<Either<Failure, User>> getById(int id);
+  Future<Either<Failure, User>> create(User user);
 }
