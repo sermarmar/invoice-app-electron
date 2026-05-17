@@ -1,14 +1,16 @@
-name: Build
+name: Build & Release
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
   build:
+    name: Build ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -21,12 +23,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.0'
-          channel: 'stable'
+          channel: stable
           cache: true
 
       - name: Install dependencies
@@ -42,16 +45,46 @@ jobs:
         env:
           CODE_SIGNING_ALLOWED: "NO"
 
-      - name: Upload Windows artifact
+      - name: Zip artifact (Windows)
         if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-build
-          path: build/windows/x64/runner/Release/
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "invoice-app-windows.zip"
 
-      - name: Upload macOS artifact
+      - name: Zip artifact (macOS)
         if: matrix.platform == 'macos'
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            "build/macos/Build/Products/Release/invoice_app.app" \
+            "invoice-app-macos.zip"
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-build
-          path: build/macos/Build/Products/Release/invoice_app.app
+          name: invoice-app-${{ matrix.platform }}.zip
+          path: invoice-app-${{ matrix.platform }}.zip
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/invoice-app-windows.zip
+            artifacts/invoice-app-macos.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
